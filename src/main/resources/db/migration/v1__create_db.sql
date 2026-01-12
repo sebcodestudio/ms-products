@@ -1,0 +1,2 @@
+-- create database if not exists prueba_db;
+-- use prueba_bd;
