@@ -1,28 +1,3 @@
-#databaseurl: jdbc:mysql://localhost:3306/?serverTimezone=UTC
 spring:
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    database-platform: org.hibernate.dialect.MySQLDialect
-    defer-datasource-initialization: true
-  datasource:
-    url: jdbc:mysql://localhost:3306/prueba_bd?createDatabaseIfNotExist=true&connectionTimeZone=LOCAL
-    username: root
-    password: S3b4s7i4n0r7e6a=?
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  sql:
-    init:
-      mode: always
-  # security:
-  #   user:
-  #     name: admin
-  #     password: 1234
-jwt:
-  secret: "mi_clave_jwt_super_segura_de_mas_de_64_caracteres_2025_backend_tienda_virtual"
-  expiration: 86400000 # 24 horas en milisegundos
-server:
-  address: 0.0.0.0
-  port: 8080
-# custom:
-#   db-name: prueba_bd
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE}

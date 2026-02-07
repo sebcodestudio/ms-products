@@ -1,5 +1,95 @@
+
+ALTER TABLE users MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Haz lo mismo para las demás tablas:
+ALTER TABLE roles MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE companies MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE company_user MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+-- etc...
+
+-- =====================================================
+-- ROLES
+-- =====================================================
+INSERT INTO roles (name, description, created_user) VALUES
+                                                        ('ADMIN', 'Super administrador del sistema', 1),
+                                                        ('USER', 'Usuario regular del sistema', 1);
+
+-- =====================================================
+-- USUARIOS
+-- =====================================================
+-- Password para todos: "admin123" (hasheado con BCrypt)
+-- Hash: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+
+-- 1. Super Admin del sistema
+INSERT INTO users (email, password, name, last_name, phone, address, birthdate, gender, active) VALUES
+    ('admin@sistema.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Admin', 'Sistema', '987654321', 'Av. Javier Prado 123, San Isidro, Lima', '1990-01-15', 1, TRUE);
+
+-- 2. Usuario Owner de Casa Store
+INSERT INTO users (email, password, name, last_name, phone, address, birthdate, gender, active) VALUES
+    ('juan.perez@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Juan', 'Pérez García', '999888777', 'Jr. Las Flores 456, Miraflores, Lima', '1988-05-20', 1, TRUE);
+
+-- 3. Usuario Owner de Ropa Store
+INSERT INTO users (email, password, name, last_name, phone, address, birthdate, gender, active) VALUES
+    ('maria.lopez@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'María', 'López Sánchez', '988777666', 'Av. Larco 789, Miraflores, Lima', '1992-08-10', 2, TRUE);
+
+-- 4. Usuario Manager de Casa Store
+INSERT INTO users (email, password, name, last_name, phone, address, birthdate, gender, active) VALUES
+    ('carlos.ramirez@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Carlos', 'Ramírez Torres', '977666555', 'Av. Benavides 321, Surco, Lima', '1995-03-15', 1, TRUE);
+
+-- 5. Usuario Seller de ambas tiendas
+INSERT INTO users (email, password, name, last_name, phone, address, birthdate, gender, active) VALUES
+    ('ana.garcia@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Ana', 'García Flores', '966555444', 'Jr. Manco Cápac 567, La Victoria, Lima', '1998-11-25', 2, TRUE);
+
+-- 6. Cliente regular (sin compañía)
+INSERT INTO users (email, password, name, last_name, phone, address, birthdate, gender, active) VALUES
+    ('cliente@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Pedro', 'Martínez Vega', '955444333', 'Av. Universitaria 890, Los Olivos, Lima', '2000-07-08', 1, TRUE);
+
+-- =====================================================
+-- ASIGNAR ROLES A USUARIOS
+-- =====================================================
+-- Admin del sistema
+INSERT INTO user_role (id_user, id_role) VALUES (1, 1); -- ADMIN
+
+-- Owners y usuarios regulares
+INSERT INTO user_role (id_user, id_role) VALUES
+                                             (2, 2), -- Juan = USER
+                                             (3, 2), -- María = USER
+                                             (4, 2), -- Carlos = USER
+                                             (5, 2), -- Ana = USER
+                                             (6, 2); -- Cliente = USER
+
+-- =====================================================
+-- COMPAÑÍAS
+-- =====================================================
+INSERT INTO companies (legal_name, trade_name, ruc, contributor_type, fiscal_address, tax_regime, created_user) VALUES
+-- 1. Casa Store
+('Comercial Hogar y Decoración SAC', 'Casa Store', '20123456789', 'LEGAL_ENTITY', 'Av. Los Olivos 1234, San Juan de Lurigancho, Lima', 'GENERAL', 1),
+
+-- 2. Ropa Store
+('Textiles y Moda EIRL', 'Ropa Store', '20987654321', 'LEGAL_ENTITY', 'Jr. Gamarra 567, La Victoria, Lima', 'MYPE', 1),
+
+-- 3. Tech Store (sin usuarios asignados aún)
+('Tecnología Digital SAC', 'Tech Store', '20456789123', 'LEGAL_ENTITY', 'Av. Javier Prado 890, San Isidro, Lima', 'GENERAL', 1),
+
+-- 4. Compañía inactiva (para pruebas de filtros)
+('Empresa Desactivada SAC', 'Empresa Test', '20111222333', 'LEGAL_ENTITY', 'Av. Test 123, Lima', 'RER', 1);
+
+-- =====================================================
+-- RELACIÓN USUARIOS <-> COMPAÑÍAS (company_users)
+-- =====================================================
+-- Casa Store (ID: 1)
+INSERT INTO company_user (user_id, company_id, role) VALUES
+                                                          (2, 1, 'OWNER'),    -- Juan es OWNER de Casa Store
+                                                          (4, 1, 'MANAGER'),  -- Carlos es MANAGER de Casa Store
+                                                          (5, 1, 'SELLER');   -- Ana es SELLER de Casa Store
+
+-- Ropa Store (ID: 2)
+INSERT INTO company_user (user_id, company_id, role) VALUES
+                                                          (3, 2, 'OWNER'),    -- María es OWNER de Ropa Store
+                                                          (5, 2, 'SELLER');   -- Ana es SELLER de Ropa Store (trabaja en ambas)
+
 -- Insertar brand
-INSERT INTO brand (name)
+INSERT INTO brands (name)
 VALUES
     ('Nike'),
     ('Puma'),
@@ -16,38 +106,33 @@ VALUES
     ('Patapampa'),
     ('MBO'),
     ('Topitop'),
-    ('Generico')
-    ;
+    ('Generico'),
+    ('Badass')
+;
 
 -- Insertar product
-INSERT INTO product (name, description, state, sold_count, score, id_brand, created_user, update_user)
+INSERT INTO products (name, description, state, score, id_brand, created_user, update_user)
 VALUES
-    ('Polo Basico', 'Camiseta de algodón, cómoda y versátil.', 1, 20, 2.5, 16, 1, 1),
-    ('Men''s antora jacket', 'Calce estándar. -/- El tejido DryVent™ de dos capas, impermeable, transpirable y con las costuras selladas y acabado hidrófugo duradero (DWR) te mantendrá siempre seco. -/- Tejido totalmente cortaviento. -/- Diseño de estilo alpino con bolsillos con cierre para las manos. -/- Capucha de tres piezas integrada con cordón ajustable y tope de bloqueo. -/- Cierre oculto por solapa de protección con cierre de velcro en la parte central delantera. -/- Refuerzos elásticos en los puños. -/- Ajuste lateral de la pretina. -/- Logo The North Face de transferencia térmica en el lado izquierdo del pecho y en la parte trasera derecha del hombro.', 1, 14, 2.5, 11, 1, 1),
-    ('Jeans Hombre Levi''s 512 Slim Taper', 'Encontrar los jeans perfectos no es tarea fácil, pero el 512 Slim Taper tiene todo lo que te gusta de nuestro Slim, aunque actualizado. Estos jeans logran un equilibrio perfecto entre el skinny y el taper: cuentan con la misma cintura que un 511, pero son más delgados en la pierna hacia el tobillo, lo que les da un look más moderno. Inspirados para que luzcas tu calzado. Un pantalón de corte delgado, pero con cinco bosillos. Cuentan con el stretch necesario para hacerlos cómodos todo el día.', 1, 18, 3.8, 12, 1, 1),
-    ('Chompa All Over Jacquard', 'Sumérgete en la rica cultura peruana con nuestra Chompa All Over Jacquard, un ejemplar que destaca por su cuidado artesanal y la representación de la autenticidad peruana. Los diseños originales y detallados no solo rinden homenaje a la tradición, sino que también reflejan la calidad excepcional y la fineza de la prenda. Confeccionada con un 100% de Fine Alpaca, esta chompa ofrece una experiencia de uso lujosa y suave al tiempo que resalta la belleza natural de la fibra. Hecha con maestría en Perú, cada diseño representa el trabajo meticuloso de artesanos expertos, fusionando la moda contemporánea con la riqueza cultural de la artesanía peruana.', 1, 14, 2.1, 13, 1, 1),
-    ('BIVIDI ESTAMPADO AZUL PV25', 'Los bividí estampado son de 100% algodón, son ideales para el clima de verano y su estampado es tipo geométrico.', 1, 23, 4.0, 14, 2, 2),
-    ('Zapatillas Urbanas Hombre Adidas Originals Samba Og', 'Zapatillas Urbanas Hombre', 1, 11, 4.2, 3, 2, 2),
+    ('Polo Basico', 'Camiseta de algodón, cómoda y versátil.', 1, 2.5, 1, 1, 1),
+    ('Men''s antora jacket', 'Calce estándar. -/- El tejido DryVent™ de dos capas, impermeable, transpirable y con las costuras selladas y acabado hidrófugo duradero (DWR) te mantendrá siempre seco. -/- Tejido totalmente cortaviento. -/- Diseño de estilo alpino con bolsillos con cierre para las manos. -/- Capucha de tres piezas integrada con cordón ajustable y tope de bloqueo. -/- Cierre oculto por solapa de protección con cierre de velcro en la parte central delantera. -/- Refuerzos elásticos en los puños. -/- Ajuste lateral de la pretina. -/- Logo The North Face de transferencia térmica en el lado izquierdo del pecho y en la parte trasera derecha del hombro.', 1, 2.5, 11, 1, 1),
+    ('Jeans Hombre Levi''s 512 Slim Taper', 'Encontrar los jeans perfectos no es tarea fácil, pero el 512 Slim Taper tiene todo lo que te gusta de nuestro Slim, aunque actualizado. Estos jeans logran un equilibrio perfecto entre el skinny y el taper: cuentan con la misma cintura que un 511, pero son más delgados en la pierna hacia el tobillo, lo que les da un look más moderno. Inspirados para que luzcas tu calzado. Un pantalón de corte delgado, pero con cinco bosillos. Cuentan con el stretch necesario para hacerlos cómodos todo el día.', 1, 3.8, 12, 1, 1),
+    ('Chompa All Over Jacquard', 'Sumérgete en la rica cultura peruana con nuestra Chompa All Over Jacquard, un ejemplar que destaca por su cuidado artesanal y la representación de la autenticidad peruana. Los diseños originales y detallados no solo rinden homenaje a la tradición, sino que también reflejan la calidad excepcional y la fineza de la prenda. Confeccionada con un 100% de Fine Alpaca, esta chompa ofrece una experiencia de uso lujosa y suave al tiempo que resalta la belleza natural de la fibra. Hecha con maestría en Perú, cada diseño representa el trabajo meticuloso de artesanos expertos, fusionando la moda contemporánea con la riqueza cultural de la artesanía peruana.', 1, 2.1, 13, 1, 1),
+    ('BIVIDI ESTAMPADO AZUL PV25', 'Los bividí estampado son de 100% algodón, son ideales para el clima de verano y su estampado es tipo geométrico.', 1, 4.0, 14, 2, 2),
+    ('Zapatillas Urbanas Hombre Adidas Originals Samba Og', 'Zapatillas Urbanas Hombre', 1, 4.2, 3, 2, 2),
 
-    ('Vestido Mujer Leonor Print Marron Chocolate', 'Topitop ha diseñado prendas para pasar esta temporada con moda y estilo de la marca Topitop Mujer. Renueva tu guardarropa con este Vestido Mujer en el color de tu preferencia y combínalos para armar tu look perfecto', 1, 14, 4.4, 15, 2, 2),
-    ('Falda Short Mini Yesi Mujer', 'Descubre la elegancia en cada paso con nuestra hermosa falda mini con short interno. Este modelo ceñido en tela loma es la elección perfecta para ocasiones formales o eventos especiales, amoldándose a tu figura con gracia. Combínalo con tu outfit favorito y haz una declaración de estilo.Características:- Falda mini con short interno para mayor comodidad y confianza.', 1, 16, 4.2, 16, 2, 2);
-    -- ('Sudadera', 'Sudadera', 1, 25, 4.6, 4, 2, 2),
-    -- ('Sudadera', 'Sudadera', 1, 31, 4.8, 4, 2, 2);
+    ('Vestido Mujer Leonor Print Marron Chocolate', 'Topitop ha diseñado prendas para pasar esta temporada con moda y estilo de la marca Topitop Mujer. Renueva tu guardarropa con este Vestido Mujer en el color de tu preferencia y combínalos para armar tu look perfecto', 1, 4.4, 15, 2, 2),
+    ('Falda Short Mini Yesi Mujer', 'Descubre la elegancia en cada paso con nuestra hermosa falda mini con short interno. Este modelo ceñido en tela loma es la elección perfecta para ocasiones formales o eventos especiales, amoldándose a tu figura con gracia. Combínalo con tu outfit favorito y haz una declaración de estilo.Características:- Falda mini con short interno para mayor comodidad y confianza.', 1, 4.2, 14, 2, 2),
 
-    -- ('Sudadera con Capucha', 'Sudadera de felpa con capucha, ideal para el frío.', 1, 10, 4, 4, 2, 2),
-    -- ('Zapatos Deportivos', 'Zapatos deportivos ligeros y cómodos para el día a día.', 1, 10, 5, 5, 2, 2),
-    -- ('Zapatillas Running', 'zapatilla', 1, 10, 4.5, 2, 1, 1),
-    -- ('Smartwatch Pro', 'smart', 1, 10, 4.2, 2, 1, 1),
-    -- ('Proteína Whey', 'proteina', 1, 10, 4.8, 3, 1, 1),
-    -- ('Polo Deportivo', 'polo', 1, 10, 4.0, 4, 1, 1),
-    -- ('Laptop Gamer', 'Potente laptop con tarjeta gráfica dedicada.', 1, 10, 4.7, 2, 1, 1),
-    -- ('Smartphone', 'Último modelo con cámara de alta resolución.', 1, 10, 4.5, 2, 1, 1),
-    -- ('Auriculares Inalámbricos', 'Cancelación de ruido y batería de 30 horas.', 1, 10, 4.6, 3, 1, 1),
-    -- ('Smartwatch', 'Monitorea tu salud y recibe notificaciones.', 1, 10, 4.4, 4, 1, 1),
-    -- ('Teclado Mecánico', 'Retroiluminado y switches azules.', 1, 10, 4.8, 5, 1, 1);
+    ('Polo Basico Goku Kaioken X3', 'Polo de algodón con estampado de Goku en alta calidad.', 1, 4.5, 17, 1, 1),
+    ('Polo Basico Goku', 'Polo de algodón con estampado de Goku en alta calidad.', 1, 4.5, 17, 1, 1),
+    ('Polo Basico Esqueleto Que Me Miras Flaco', 'Polo de algodón con estampado de Esqueleto Gym con frase Que Me Miras Flaco en alta calidad.', 1, 4.5, 17, 1, 1),
+    ('Polo Basico Simbolo Arana', 'Polo de algodón con estampado de Arana en alta calidad.', 1, 4.5, 17, 1, 1),
+    ('Polo Basico Venom', 'Polo de algodón con estampado de Venom en alta calidad.', 1, 4.5, 17, 1, 1)
+
+;
 
 -- variant product
-INSERT INTO variant_product (sku, sold_count, price, discount, price_discount, discount_start_date, discount_end_date, stock, id_product, created_user, update_user)
+INSERT INTO variant_products (sku, sold_count, price, discount, original_price, discount_start_date, discount_end_date, stock, id_product, created_user, update_user)
 VALUES
     ('POLO-ROJO-XL', 4, 25.99, NULL, NULL, NULL, NULL, 150, 1, 1, 1),
     ('POLO-ROJO-L', 4, 19.99, 10, 17.00, '2025-11-01', '2025-11-30', 150, 1, 1, 1),
@@ -66,53 +151,56 @@ VALUES
     ('VAR-VESTIDO-01', 0, 190.00, 10, 171.00, '2025-11-01', '2025-11-30', 5, 7, 2, 2),
     ('VAR-VESTIDO-02', 0, 200.00, 8, 184.00, '2025-11-01', '2025-11-30', 4, 7, 2, 2),
     ('VAR-FALDA-01', 0, 120.00, 12, 105.60, '2025-11-01', '2025-11-30', 9, 8, 2, 2),
-    ('VAR-FALDA-02', 0, 130.00, 10, 117.00, '2025-11-01', '2025-11-30', 8, 8, 2, 2);
-    -- ('POLO-ROJO-XL', 4, 25.99, null, null, 150, 1, 1, 1),
-    -- ('POLO-ROJO-L', 4, 19.99, 10, 17.00, 150, 1, 1, 1),
-    -- ('POLO-BLANCO-M', 4, 19.99, 10, 17.00, 150, 1, 1, 1),
-    -- ('POLO-BLANCO-L', 4, 19.99, 10, 17.00, 150, 1, 1, 1),
-    -- ('VAR-MEN-JKT-01', 0, 350.00, 10, 315.00, 5, 2, 1, 1),
-    -- ('VAR-MEN-JKT-02', 0, 360.00, 5, 342.00, 3, 2, 1, 1),
-    -- ('VAR-LEVIS-512-01', 0, 280.00, 15, 238.00, 6, 3, 1, 1),
-    -- ('VAR-LEVIS-512-02', 0, 290.00, 10, 261.00, 8, 3, 1, 1),
-    -- ('VAR-CHOMPA-01', 0, 210.00, 12, 184.80, 4, 4, 1, 1),
-    -- ('VAR-CHOMPA-02', 0, 220.00, 8, 202.40, 5, 4, 1, 1),
-    -- ('VAR-BIVIDI-01', 0, 70.00, 20, 56.00, 10, 5, 2, 2),
-    -- ('VAR-BIVIDI-02', 0, 75.00, 15, 63.75, 8, 5, 2, 2),
-    -- ('VAR-SAMBA-01', 0, 400.00, 10, 360.00, 6, 6, 2, 2),
-    -- ('VAR-SAMBA-02', 0, 420.00, 5, 399.00, 7, 6, 2, 2),
-    -- ('VAR-VESTIDO-01', 0, 190.00, 10, 171.00, 5, 7, 2, 2),
-    -- ('VAR-VESTIDO-02', 0, 200.00, 8, 184.00, 4, 7, 2, 2),
-    -- ('VAR-FALDA-01', 0, 120.00, 12, 105.60, 9, 8, 2, 2),
-    -- ('VAR-FALDA-02', 0, 130.00, 10, 117.00, 8, 8, 2, 2);
+    ('VAR-FALDA-02', 0, 130.00, 10, 117.00, '2025-11-01', '2025-11-30', 8, 8, 2, 2),
 
-    -- ('BG02', 3, 35.00, 20, 30.00, 80, 2, 1, 1),
-    -- ('BG03', 2, 120.00, 10, 110, 50, 3, 1, 1),
-    -- ('BG04', 1, 45.00, 5, 40.00, 200, 4, 2, 2),
-    -- ('BG05', 45, 65.00, 2, 63.00, 100, 5, 2, 2),
-    -- ('VR01', 45, 220.00, 5, 209.00, 100, 6, 1, 1), -- Zapatillas Running
-    -- ('TEC01', 25, 1200.00, 0, 1200.00, 50, 10, 1, 1), -- Laptop Gamer
-    -- ('TEC02', 30, 800.00, 5, 760.00, 100, 11, 1, 1),  -- Smartphone
-    -- ('TEC03', 40, 150.00, 10, 135.00, 200, 12, 1, 1), -- Auriculares
-    -- ('TEC04', 35, 200.00, 8, 184.00, 150, 13, 1, 1),  -- Smartwatch
-    -- ('TEC05', 20, 100.00, 0, 100.00, 120, 14, 1, 1);  -- Teclado Mecánico
--- INSERT INTO variant_product (sku, sold_count, price, discount, price_discount, stock, id_product, created_user, update_user, discount_start_date, discount_end_date, discount_update_user)
--- VALUES
---     ('VR02', 42, 350.00, 10, 315.00, 80, 7, 1, 1, '2025-10-01', '2025-12-31', 1),
---     ('VR03', 48, 120.00, 5, 114.00, 200, 8, 1, 1, '2025-10-01', '2025-12-31', 1),
---     ('VR04', 40, 70.00, 15, 59.50, 160, 9, 1, 1, '2025-10-01', '2025-12-31', 1);
+    ('PB-GKX3-BL-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 9, 1, NULL),
+    ('PB-GKX3-BL-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 9, 1, NULL),
+    ('PB-GKX3-BL-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 9, 1, NULL),
+    ('PB-GKX3-WH-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 9, 1, NULL),
+    ('PB-GKX3-WH-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 9, 1, NULL),
+    ('PB-GKX3-WH-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 9, 1, NULL),
 
+    ('PB-GK-BL-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 10, 1, NULL),
+    ('PB-GK-BL-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 10, 1, NULL),
+    ('PB-GK-BL-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 10, 1, NULL),
+    ('PB-GK-WH-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 10, 1, NULL),
+    ('PB-GK-WH-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 10, 1, NULL),
+    ('PB-GK-WH-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 10, 1, NULL),
 
+    ('PB-EQQMF-BL-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 11, 1, NULL),
+    ('PB-EQQMF-BL-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 11, 1, NULL),
+    ('PB-EQQMF-BL-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 11, 1, NULL),
+    ('PB-EQQMF-WH-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 11, 1, NULL),
+    ('PB-EQQMF-WH-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 11, 1, NULL),
+    ('PB-EQQMF-WH-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 11, 1, NULL),
 
-INSERT INTO attribute_type (name, created_user, update_user)
+    ('PB-ARTB-BL-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 12, 1, NULL),
+    ('PB-ARTB-BL-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 12, 1, NULL),
+    ('PB-ARTB-BL-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 12, 1, NULL),
+    ('PB-ARTB-WH-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 12, 1, NULL),
+    ('PB-ARTB-WH-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 12, 1, NULL),
+    ('PB-ARTB-WH-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 12, 1, NULL),
+
+    ('PB-VE-BL-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 13, 1, NULL),
+    ('PB-VE-BL-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 13, 1, NULL),
+    ('PB-VE-BL-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 13, 1, NULL),
+    ('PB-VE-WH-S', 0, 19.90, NULL, NULL, NULL, NULL, 10, 13, 1, NULL),
+    ('PB-VE-WH-M', 0, 19.90, NULL, NULL, NULL, NULL, 10, 13, 1, NULL),
+    ('PB-VE-WH-L', 0, 19.90, NULL, NULL, NULL, NULL, 10, 13, 1, NULL)
+
+;
+
+INSERT INTO attribute_types (name, created_user, update_user)
 VALUES
     ('TALLA-PRENDA', 1, 1),
     ('TALLA-CALZADO', 1, 1),
     ('COLOR', 1, 1),
     ('MEMORIA-GB', 1, 1),
-    ('SABOR', 1, 1);
+    ('SABOR', 1, 1)
 
-INSERT INTO attribute_value (value, id_attribute_type, created_user, update_user)
+;
+
+INSERT INTO attribute_values (value, id_attribute_type, created_user, update_user)
 VALUES
     ('S', 1, 1, 1),
     ('M', 1, 1, 1),
@@ -134,10 +222,12 @@ VALUES
     ('256', 4, 1, 1),
     ('CHOCOLATE', 5, 1, 1),
     ('COOKIES', 5, 1, 1),
-    ('FRESA', 5, 1, 1);
+    ('FRESA', 5, 1, 1)
+
+;
 
 -- Insertar variant_attribute
-INSERT INTO variant_attribute (id_variant_product, created_user, update_user)
+INSERT INTO variant_attributes (id_variant_product, created_user, update_user)
 VALUES
     (1, 1, 2),
     (2, 1, 2),
@@ -156,9 +246,46 @@ VALUES
     (15, 1, 2),
     (16, 1, 2),
     (17, 1, 2),
-    (18, 1, 2);
+    (18, 1, 2),
 
-INSERT INTO variant_attribute_attribute_value (id_attribute_value, id_variant)
+    (19, 1, NULL),
+    (20, 1, NULL),
+    (21, 1, NULL),
+    (22, 1, NULL),
+    (23, 1, NULL),
+    (24, 1, NULL),
+
+    (25, 1, NULL),
+    (26, 1, NULL),
+    (27, 1, NULL),
+    (28, 1, NULL),
+    (29, 1, NULL),
+    (30, 1, NULL),
+
+    (31, 1, NULL),
+    (32, 1, NULL),
+    (33, 1, NULL),
+    (34, 1, NULL),
+    (35, 1, NULL),
+    (36, 1, NULL),
+
+    (37, 1, NULL),
+    (38, 1, NULL),
+    (39, 1, NULL),
+    (40, 1, NULL),
+    (41, 1, NULL),
+    (42, 1, NULL),
+
+    (43, 1, NULL),
+    (44, 1, NULL),
+    (45, 1, NULL),
+    (46, 1, NULL),
+    (47, 1, NULL),
+    (48, 1, NULL)
+
+;
+
+INSERT INTO variant_attribute_attribute_value (id_attribute_value, id_variant_attribute)
 VALUES
     (4, 1),  -- XL
     (12, 1), -- ROJO
@@ -193,85 +320,108 @@ VALUES
     (2, 17),
     (13, 17),
     (3, 18),
-    (14, 18);
-    -- (4, 1),
-    -- (12, 1),
-    -- (12, 2),
-    -- (13, 2),
-    -- (14, 2),
-    -- (15, 2),
-    -- (16, 2),
-    -- (14, 3),
-    -- (2, 3),
-    -- (3, 3),
-    -- (14, 4),
-    -- (15, 4),
-    -- (2, 4),
-    -- (3, 4),
-    -- (14, 5),
-    -- (15, 5),
-    -- (5, 5),
-    -- (6, 5),
-    -- (7, 5),
-    -- (8, 5),
-    -- (9, 5),
-    -- (14, 6),
-    -- (15, 6),
-    -- (5, 6),
-    -- (6, 6),
-    -- (7, 6),
-    -- (8, 6),
-    -- (9, 6),
-    -- (17, 7),
-    -- (18, 7),
-    -- (19, 8),
-    -- (20, 8),
-    -- (21, 8),
-    -- (1, 9),
-    -- (2, 9),
-    -- (3, 9),
-    -- (4, 9),
-    -- (12, 9),
-    -- (13, 9),
-    -- (14, 10),
-    -- (15, 10),
-    -- (17, 10),
-    -- (18, 10),
-    -- (14, 11),
-    -- (15, 11),
-    -- (17, 11),
-    -- (18, 11),
-    -- (14, 12),
-    -- (15, 12),
-    -- (14, 13),
-    -- (15, 13),
-    -- (14, 14);
+    (14, 18),
+
+    (1, 19),
+    (15, 19),
+    (2, 20),
+    (15, 20),
+    (3, 21),
+    (15, 21),
+    (1, 22),
+    (14, 22),
+    (2, 23),
+    (14, 23),
+    (3, 24),
+    (14, 24),
+
+    (1, 25),
+    (15, 25),
+    (2, 26),
+    (15, 26),
+    (3, 27),
+    (15, 27),
+    (1, 28),
+    (14, 28),
+    (2, 29),
+    (14, 29),
+    (3, 30),
+    (14, 30),
+
+    (1, 31),
+    (15, 31),
+    (2, 32),
+    (15, 32),
+    (3, 33),
+    (15, 33),
+    (1, 34),
+    (14, 34),
+    (2, 35),
+    (14, 35),
+    (3, 36),
+    (14, 36),
+
+    (1, 37),
+    (15, 37),
+    (2, 38),
+    (15, 38),
+    (3, 39),
+    (15, 39),
+    (1, 40),
+    (14, 40),
+    (2, 41),
+    (14, 41),
+    (3, 42),
+    (14, 42),
+
+    (1, 43),
+    (15, 43),
+    (2, 44),
+    (15, 44),
+    (3, 45),
+    (15, 45),
+    (1, 46),
+    (14, 46),
+    (2, 47),
+    (14, 47),
+    (3, 48),
+    (14, 48)
+;
 
 -- Insertar product_img
-INSERT INTO product_img (name, image_url, id_variant_attribute, created_user, update_user)
+INSERT INTO product_imgs (name, image_url, id_variant_attribute, created_user, update_user)
 VALUES
     ('Polo Básica', 'img/products/camiseta_negra.jpg', 1, 1, 2),
+    ('Polo Básica', 'img/products/camiseta_negra.jpg', 2, 1, 2),
+    ('Polo Básica', 'img/products/camiseta_negra.jpg', 3, 1, 2),
+    ('Polo Básica', 'img/products/camiseta_negra.jpg', 4, 1, 2),
 
     ('Men''s antora jacket', 'img/products/jacket.webp', 5, 1, 2),
+    ('Men''s antora jacket', 'img/products/jacket.webp', 6, 1, 2),
 
     ('Jeans Hombre Levi''s 512 Slim Taper', 'img/products/jeans.webp', 7, 1, 2),
+    ('Jeans Hombre Levi''s 512 Slim Taper', 'img/products/jeans.webp', 8, 1, 2),
 
     ('Chompa All Over Jacquard', 'img/products/chompa.webp', 9, 1, 2),
+    ('Chompa All Over Jacquard', 'img/products/chompa.webp', 10, 1, 2),
 
     ('BIVIDI ESTAMPADO AZUL PV25', 'img/products/bividi10.webp', 11, 1, 2),
     ('BIVIDI ESTAMPADO AZUL PV25', 'img/products/bividi11.webp', 11, 1, 2),
     ('BIVIDI ESTAMPADO AZUL PV25', 'img/products/bividi12.webp', 11, 1, 2),
+    ('BIVIDI ESTAMPADO AZUL PV25', 'img/products/bividi10.webp', 12, 1, 2),
 
     ('Zapatillas Urbanas Mujer Adidas Originals Samba Og', 'img/products/zapatillas10.webp', 13, 1, 2),
     ('Zapatillas Urbanas Mujer Adidas Originals Samba Og', 'img/products/zapatillas11.webp', 13, 1, 2),
     ('Zapatillas Urbanas Mujer Adidas Originals Samba Og', 'img/products/zapatillas12.webp', 13, 1, 2),
     ('Zapatillas Urbanas Mujer Adidas Originals Samba Og', 'img/products/zapatillas13.webp', 13, 1, 2),
     ('Zapatillas Urbanas Mujer Adidas Originals Samba Og', 'img/products/zapatillas14.webp', 13, 1, 2),
+    ('Zapatillas Urbanas Mujer Adidas Originals Samba Og', 'img/products/zapatillas10.webp', 14, 1, 2),
 
     ('Vestido Mujer Leonor Print Marron Chocolate', 'img/products/vestido1.webp', 15, 1, 2),
     ('Vestido Mujer Leonor Print Marron Chocolate', 'img/products/vestido2.webp', 15, 1, 2),
     ('Vestido Mujer Leonor Print Marron Chocolate', 'img/products/vestido3.webp', 15, 1, 2),
     ('Vestido Mujer Leonor Print Marron Chocolate', 'img/products/vestido4.webp', 15, 1, 2),
+    ('Vestido Mujer Leonor Print Marron Chocolate', 'img/products/vestido4.webp', 16, 1, 2),
 
     ('Falda Short Mini Yesi Mujer', 'img/products/falda10.webp', 17, 1, 2),
     ('Falda Short Mini Yesi Mujer', 'img/products/falda11.webp', 17, 1, 2),
@@ -283,31 +433,82 @@ VALUES
     ('Falda Short Mini Yesi Mujer', 'img/products/falda21.webp', 18, 1, 2),
     ('Falda Short Mini Yesi Mujer', 'img/products/falda22.webp', 18, 1, 2),
     ('Falda Short Mini Yesi Mujer', 'img/products/falda23.webp', 18, 1, 2),
-    ('Falda Short Mini Yesi Mujer', 'img/products/falda24.webp', 18, 1, 2);
+    ('Falda Short Mini Yesi Mujer', 'img/products/falda24.webp', 18, 1, 2),
 
-    -- ('Jeans Ajustados', 'img/products/jeans_azul.jpg', 2, 1, 2),
-    -- ('Chaqueta de Cuero', 'img/products/chaqueta_cuero.jpg', 3, 1, 2),
-    -- ('Sudadera con Capucha', 'img/products/gorra.jpg', 4, 1, 2),
-    -- ('Zapatos Deportivos', 'img/products/zapatillas.jpg', 5, 1, 2),
-    -- ('Zapatillas Running', 'img/products/zapatilla-deportiva.webp', 6, 1, 1),
-    -- ('Smartwatch Pro', 'img/products/smart-watch.avif', 7, 1, 1),
-    -- ('Proteína Whey', 'img/products/proteina-whey.webp', 8, 1, 1),
-    -- ('Polo Deportivo', 'img/products/polo-deportivo.png', 9, 1, 1),
-    -- ('Laptop Gamer', 'img/products/laptopgamer.webp', 10, 1, 1),
-    -- ('Smartphone', 'img/products/smart-phone.avif', 11, 1, 1),
-    -- ('Auriculares Inalámbricos', 'img/products/auriculares_inalambricos.webp', 12, 1, 1),
-    -- ('Smartwatch', 'img/products/smart-watch.avif', 13, 1, 1),
-    -- ('Teclado Mecánico', 'img/products/teclado_mecanico.webp', 14, 1, 1);
+    ('polo-basico-gokukaiokenx3-black-600', 'img/products/polo-basico-gokukaiokenx3-black-600.webp', 19, 1, NULL),
+    ('polo-basico-gokukaiokenx3-black-1200', 'img/products/polo-basico-gokukaiokenx3-black-1200.webp', 19, 1, NULL),
+    ('polo-basico-gokukaiokenx3-black-600', 'img/products/polo-basico-gokukaiokenx3-black-600.webp', 20, 1, NULL),
+    ('polo-basico-gokukaiokenx3-black-1200', 'img/products/polo-basico-gokukaiokenx3-black-1200.webp', 20, 1, NULL),
+    ('polo-basico-gokukaiokenx3-black-600', 'img/products/polo-basico-gokukaiokenx3-black-600.webp', 21, 1, NULL),
+    ('polo-basico-gokukaiokenx3-black-1200', 'img/products/polo-basico-gokukaiokenx3-black-1200.webp', 21, 1, NULL),
+    ('polo-basico-gokukaiokenx3-white-600', 'img/products/polo-basico-gokukaiokenx3-white-600.webp', 22, 1, NULL),
+    ('polo-basico-gokukaiokenx3-white-1200', 'img/products/polo-basico-gokukaiokenx3-white-1200.webp', 22, 1, NULL),
+    ('polo-basico-gokukaiokenx3-white-600', 'img/products/polo-basico-gokukaiokenx3-white-600.webp', 23, 1, NULL),
+    ('polo-basico-gokukaiokenx3-white-1200', 'img/products/polo-basico-gokukaiokenx3-white-1200.webp', 23, 1, NULL),
+    ('polo-basico-gokukaiokenx3-white-600', 'img/products/polo-basico-gokukaiokenx3-white-600.webp', 24, 1, NULL),
+    ('polo-basico-gokukaiokenx3-white-1200', 'img/products/polo-basico-gokukaiokenx3-white-1200.webp', 24, 1, NULL),
 
-INSERT INTO category (name, description, created_user, update_user, image_url)
+    ('polo-basico-gokusombra-black-600', 'img/products/polo-basico-gokusombra-black-600.webp', 25, 1, NULL),
+    ('polo-basico-gokusombra-black-1200', 'img/products/polo-basico-gokusombra-black-1200.webp', 25, 1, NULL),
+    ('polo-basico-gokusombra-black-600', 'img/products/polo-basico-gokusombra-black-600.webp', 26, 1, NULL),
+    ('polo-basico-gokusombra-black-1200', 'img/products/polo-basico-gokusombra-black-1200.webp', 26, 1, NULL),
+    ('polo-basico-gokusombra-black-600', 'img/products/polo-basico-gokusombra-black-600.webp', 27, 1, NULL),
+    ('polo-basico-gokusombra-black-1200', 'img/products/polo-basico-gokusombra-black-1200.webp', 27, 1, NULL),
+    ('polo-basico-gokusombra-white-600', 'img/products/polo-basico-gokusombra-white-600.webp', 28, 1, NULL),
+    ('polo-basico-gokusombra-white-1200', 'img/products/polo-basico-gokusombra-white-1200.webp', 28, 1, NULL),
+    ('polo-basico-gokusombra-white-600', 'img/products/polo-basico-gokusombra-white-600.webp', 29, 1, NULL),
+    ('polo-basico-gokusombra-white-1200', 'img/products/polo-basico-gokusombra-white-1200.webp', 29, 1, NULL),
+    ('polo-basico-gokusombra-white-600', 'img/products/polo-basico-gokusombra-white-600.webp', 30, 1, NULL),
+    ('polo-basico-gokusombra-white-1200', 'img/products/polo-basico-gokusombra-white-1200.webp', 30, 1, NULL),
+
+    ('polo-basico-que_me_miras_flaco-black-600', 'img/products/polo-basico-que_me_miras_flaco-black-600.webp', 31, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-black-1200', 'img/products/polo-basico-que_me_miras_flaco-black-1200.webp', 31, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-black-600', 'img/products/polo-basico-que_me_miras_flaco-black-600.webp', 32, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-black-1200', 'img/products/polo-basico-que_me_miras_flaco-black-1200.webp', 32, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-black-600', 'img/products/polo-basico-que_me_miras_flaco-black-600.webp', 33, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-black-1200', 'img/products/polo-basico-que_me_miras_flaco-black-1200.webp', 33, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-white-600', 'img/products/polo-basico-que_me_miras_flaco-white-600.webp', 34, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-white-1200', 'img/products/polo-basico-que_me_miras_flaco-white-1200.webp', 34, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-white-600', 'img/products/polo-basico-que_me_miras_flaco-white-600.webp', 35, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-white-1200', 'img/products/polo-basico-que_me_miras_flaco-white-1200.webp', 35, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-white-600', 'img/products/polo-basico-que_me_miras_flaco-white-600.webp', 36, 1, NULL),
+    ('polo-basico-que_me_miras_flaco-white-1200', 'img/products/polo-basico-que_me_miras_flaco-white-1200.webp', 36, 1, NULL),
+
+    ('polo-basico-spiderman-tobey-black-600', 'img/products/polo-basico-spiderman-tobey-black-600.webp', 37, 1, NULL),
+    ('polo-basico-spiderman-tobey-black-1200', 'img/products/polo-basico-spiderman-tobey-black-1200.webp', 37, 1, NULL),
+    ('polo-basico-spiderman-tobey-black-600', 'img/products/polo-basico-spiderman-tobey-black-600.webp', 38, 1, NULL),
+    ('polo-basico-spiderman-tobey-black-1200', 'img/products/polo-basico-spiderman-tobey-black-1200.webp', 38, 1, NULL),
+    ('polo-basico-spiderman-tobey-black-600', 'img/products/polo-basico-spiderman-tobey-black-600.webp', 39, 1, NULL),
+    ('polo-basico-spiderman-tobey-black-1200', 'img/products/polo-basico-spiderman-tobey-black-1200.webp', 39, 1, NULL),
+    ('polo-basico-spiderman-tobey-white-600', 'img/products/polo-basico-spiderman-tobey-white-600.webp', 40, 1, NULL),
+    ('polo-basico-spiderman-tobey-white-1200', 'img/products/polo-basico-spiderman-tobey-white-1200.webp', 40, 1, NULL),
+    ('polo-basico-spiderman-tobey-white-600', 'img/products/polo-basico-spiderman-tobey-white-600.webp', 41, 1, NULL),
+    ('polo-basico-spiderman-tobey-white-1200', 'img/products/polo-basico-spiderman-tobey-white-1200.webp', 41, 1, NULL),
+    ('polo-basico-spiderman-tobey-white-600', 'img/products/polo-basico-spiderman-tobey-white-600.webp', 42, 1, NULL),
+    ('polo-basico-spiderman-tobey-white-1200', 'img/products/polo-basico-spiderman-tobey-white-1200.webp', 42, 1, NULL),
+
+    ('polo-basico-venom-black-600', 'img/products/polo-basico-venom-black-600.webp', 43, 1, NULL),
+    ('polo-basico-venom-black-1200', 'img/products/polo-basico-venom-black-1200.webp', 43, 1, NULL),
+    ('polo-basico-venom-black-600', 'img/products/polo-basico-venom-black-600.webp', 44, 1, NULL),
+    ('polo-basico-venom-black-1200', 'img/products/polo-basico-venom-black-1200.webp', 44, 1, NULL),
+    ('polo-basico-venom-black-600', 'img/products/polo-basico-venom-black-600.webp', 45, 1, NULL),
+    ('polo-basico-venom-black-1200', 'img/products/polo-basico-venom-black-1200.webp', 45, 1, NULL),
+    ('polo-basico-venom-white-600', 'img/products/polo-basico-venom-white-600.webp', 46, 1, NULL),
+    ('polo-basico-venom-white-1200', 'img/products/polo-basico-venom-white-1200.webp', 46, 1, NULL),
+    ('polo-basico-venom-white-600', 'img/products/polo-basico-venom-white-600.webp', 47, 1, NULL),
+    ('polo-basico-venom-white-1200', 'img/products/polo-basico-venom-white-1200.webp', 47, 1, NULL),
+    ('polo-basico-venom-white-600', 'img/products/polo-basico-venom-white-600.webp', 48, 1, NULL),
+    ('polo-basico-venom-white-1200', 'img/products/polo-basico-venom-white-1200.webp', 48, 1, NULL)
+;
+
+INSERT INTO categories (name, description, created_user, update_user, image_url)
 VALUES
     ('Ropa Hombre', 'Categoría de ropa para hombres, incluye camisetas, jeans, chaquetas, etc.', 1, 1, 'img/categories/ropa_hombre.jpg'),
-    ('Ropa Mujer', 'Ropa de mujer ideal para estaciones frías, como sudaderas y chaquetas.', 1, 1, 'img/categories/ropa_mujer.jpg');
-    -- ('Tecnología', 'Categoría de tecnología y gadgets.', 1, 1, 'img/categories/tecnologia.jpg'),
-    -- ('Nutrición', 'Suplementos y productos de nutrición.', 1, 1, 'img/categories/suplementos.jpg'),
-    -- ('Deporte', 'Artículos y ropa deportiva.', 1, 1, 'img/categories/deporte.jpg');
+    ('Ropa Mujer', 'Ropa de mujer ideal para estaciones frías, como sudaderas y chaquetas.', 1, 1, 'img/categories/ropa_mujer.jpg')
 
-INSERT INTO subcategory (id_category, name, description, created_user, update_user, image_url)
+;
+
+INSERT INTO subcategories (id_category, name, description, created_user, update_user, image_url)
 VALUES
     (1, 'Polos', 'polito', 1, 1,'img/subcategories/polo_modelo.webp'),
     (1, 'Casacas', 'chompita', 1, 1, 'img/subcategories/casaca_modelo.webp'),
@@ -318,27 +519,9 @@ VALUES
     (2, 'Vestidos', 'vestidito', 1, 1, 'img/subcategories/vestido.jpg'),
     (2, 'Faldas', 'faldas', 1, 1, 'img/subcategories/falda.jpg'),
     (2, 'Casacas', 'casacasa mujer', 1, 1, 'img/subcategories/casaca_mujer.jpg'),
-    (2, 'Pantalones', 'pantalon mujer', 1, 1, 'img/subcategories/pantalon_mujer.jpeg');
-    -- (2, 'Sombreros', 'sombreros mujer', 1, 1, 'img/subcategories/sombrero_mujer.jpg'),
-    -- (2, 'Chompas', 'chompas mujer', 1, 1, 'img/subcategories/chompa_mujer.jpg'),
-    -- (3, 'Gadgets', 'Dispositivos electrónicos modernos.', 1, 1, 'img/subcategories/gadgets.webp'),
-    -- (3, 'Tablets', 'tablets', 1, 1, 'img/subcategories/tablets.avif'),
-    -- (3, 'Celulares', 'celulares', 1, 1, 'img/subcategories/celulares.jpeg'),
-    -- (3, 'TVs', 'tv', 1, 1, 'img/subcategories/tv.avif'),
-    -- (3, 'laptops', 'laptops', 1, 1, 'img/subcategories/laptops.jpeg'),
-    -- (3, 'Parlantes', 'parlantes', 1, 1, 'img/subcategories/parlantes.jpg'),
-    -- (4, 'Proteinas', 'proteinas', 1, 1, 'img/subcategories/proteinas.webp'),
-    -- (4, 'Creatinas', 'creatinas', 1, 1, 'img/subcategories/creatina.webp'),
-    -- (4, 'Colagenos', 'colagenos', 1, 1, 'img/subcategories/colageno.webp'),
-    -- (4, 'Vitaminas', 'vitaminas', 1, 1, 'img/subcategories/vitaminas.jpg'),
-    -- (4, 'Preentrenos', 'preentrenos', 1, 1, 'img/subcategories/preentreno.webp'),
-    -- (4, 'Carbohidratos', 'carbohidratos', 1, 1, 'img/subcategories/carbos.jpg'),
-    -- (5, 'Pesas', 'pesas', 1, 1, 'img/subcategories/pesas.webp'),
-    -- (5, 'Maquinas', 'maquinas', 1, 1, 'img/subcategories/maquinas.webp'),
-    -- (5, 'Ropa Hombre Deportiva', 'ropa hombre deportiva', 1, 1, 'img/subcategories/ropa_hombre_deportiva.webp'),
-    -- (5, 'Ropa Mujer Deportiva', 'carbohidratos', 1, 1, 'img/subcategories/ropa_mujer_deportiva.jpeg'),
-    -- (5, 'Balones', 'balones', 1, 1, 'img/subcategories/balones.webp'),
-    -- (5, 'Gadgets', 'gadgets', 1, 1, 'img/subcategories/gadgets.jpg');
+    (2, 'Pantalones', 'pantalon mujer', 1, 1, 'img/subcategories/pantalon_mujer.jpeg')
+
+;
 
 INSERT INTO product_subcategory (id_product, id_subcategory)
 VALUES
@@ -348,141 +531,13 @@ VALUES
     (4,4),
     (5,5),
     (6,6),
-    (7,7);
-    -- (6,5), -- Zapatillas Running -> Zapatilla
-    -- (7,2), -- Smartwatch Pro -> Chompa (provisional, ya que no tienes categoría tech)
-    -- (8,1), -- Proteína Whey -> Polo (provisional)
-    -- (9,1), -- Polo Deportivo -> Polo
-    -- (10, 6), -- Laptop Gamer -> Gadgets
-    -- (11, 6), -- Smartphone -> Gadgets
-    -- (12, 6), -- Auriculares -> Gadgets
-    -- (13, 6), -- Smartwatch -> Gadgets
-    -- (14, 6); -- Teclado Mecánico -> Gadgets
+    (7,7),
+    (8,8),
 
+    (9,1),
+    (10,1),
+    (11,1),
+    (12,1),
+    (13,1)
 
-
-
-
-
-
-
-
-
--- INSERT INTO category (name, description, created_user, update_user, image_url)
--- VALUES
---     ('Ropa Hombre', 'Ropa para hombres: polos, jeans, chaquetas, etc.', 1, 1, 'img/categories/ropa_hombre.jpg'),
---     ('Ropa Mujer', 'Ropa moderna y cómoda para mujeres.', 1, 1, 'img/categories/ropa_mujer.jpg'),
---     ('Tecnología', 'Dispositivos, accesorios y gadgets tecnológicos.', 1, 1, 'img/categories/tecnologia.jpg'),
---     ('Nutrición', 'Suplementos deportivos y alimentos saludables.', 1, 1, 'img/categories/nutricion.jpg'),
---     ('Deporte', 'Ropa y accesorios deportivos.', 1, 1, 'img/categories/deporte.jpg');
-
--- INSERT INTO subcategory (name, description, created_user, update_user, id_category, image_url)
--- VALUES
---     ('Polos', 'Polos básicos, deportivos y de moda.', 1, 1, 1, 'img/subcategories/polo_modelo.webp'),
---     ('Jeans', 'Pantalones denim ajustados o clásicos.', 1, 1, 1, 'img/subcategories/jeans_modelo.webp'),
---     ('Chaquetas', 'Chaquetas de cuero, jean o abrigo.', 1, 1, 1, 'img/subcategories/chaqueta_modelo.webp'),
---     ('Zapatillas', 'Zapatillas deportivas y casuales.', 1, 1, 5, 'img/subcategories/zapatillas_modelo.webp'),
---     ('Gadgets', 'Smartphones, smartwatches y otros dispositivos.', 1, 1, 3, 'img/subcategories/gadgets.webp'),
---     ('Suplementos', 'Proteínas, aminoácidos y vitaminas.', 1, 1, 4, 'img/subcategories/suplementos.webp');
-
-
--- INSERT INTO product (name, description, state, sold_count, score, id_brand, created_user, update_user)
--- VALUES
---     ('Polo Clásico', 'Polo de algodón 100% cómodo y duradero.', 1, 85, 4.3, 1, 1, 1),
---     ('Jeans Slim Fit', 'Jeans ajustados con mezclilla elástica.', 1, 60, 4.1, 2, 1, 1),
---     ('Chaqueta de Cuero', 'Chaqueta auténtica con cierre metálico.', 1, 40, 4.7, 3, 1, 1),
---     ('Zapatillas Running', 'Zapatillas ligeras con amortiguación avanzada.', 1, 120, 4.6, 2, 1, 1),
---     ('Smartwatch Pro', 'Reloj inteligente con monitor de ritmo cardíaco.', 1, 200, 4.8, 7, 1, 1),
---     ('Proteína Whey', 'Proteína de suero con alto valor biológico.', 1, 300, 4.9, 6, 1, 1);
-
-
--- INSERT INTO product_subcategory (id_product, id_subcategory)
--- VALUES
---     (1, 1), -- Polo Clásico -> Polos
---     (2, 2), -- Jeans -> Jeans
---     (3, 3), -- Chaqueta -> Chaquetas
---     (4, 4), -- Zapatillas -> Zapatillas
---     (5, 5), -- Smartwatch -> Gadgets
---     (6, 6); -- Proteína Whey -> Suplementos
-
--- INSERT INTO variant_product (sku, sold_count, price, discount, price_discount, stock, id_product, created_user, update_user)
--- VALUES
---     -- Polo Clásico (por color y talla)
---     ('POLO-ROJO-S', 30, 59.90, 0, 59.90, 100, 1, 1, 1),
---     ('POLO-ROJO-M', 25, 59.90, 0, 59.90, 80, 1, 1, 1),
---     ('POLO-NEGRO-S', 15, 59.90, 5, 56.90, 90, 1, 1, 1),
-
---     -- Jeans Slim Fit (por talla)
---     ('JEAN-30', 15, 120.00, 0, 120.00, 60, 2, 1, 1),
---     ('JEAN-32', 25, 120.00, 10, 108.00, 50, 2, 1, 1),
-
---     -- Zapatillas Running (por color y talla)
---     ('ZAPA-BLANCA-41', 40, 250.00, 5, 237.50, 100, 4, 1, 1),
---     ('ZAPA-NEGRA-42', 35, 250.00, 10, 225.00, 120, 4, 1, 1),
-
---     -- Smartwatch Pro (por memoria)
---     ('SMART-128GB', 80, 800.00, 10, 720.00, 90, 5, 1, 1),
---     ('SMART-256GB', 70, 900.00, 15, 765.00, 80, 5, 1, 1),
-
---     -- Proteína Whey (por sabor)
---     ('WHEY-CHOCOLATE', 120, 250.00, 5, 237.50, 200, 6, 1, 1),
---     ('WHEY-FRESA', 180, 250.00, 0, 250.00, 300, 6, 1, 1);
-
--- INSERT INTO attribute_type (name, created_user, update_user)
--- VALUES
---     ('TALLA-PRENDA', 1, 1),
---     ('TALLA-CALZADO', 1, 1),
---     ('COLOR', 1, 1),
---     ('MEMORIA-GB', 1, 1),
---     ('SABOR', 1, 1);
-
--- INSERT INTO attribute_value (value, id_attribute_type, created_user, update_user)
--- VALUES
---     ('S', 1, 1, 1),
---     ('M', 1, 1, 1),
---     ('30', 1, 1, 1),
---     ('32', 1, 1, 1),
---     ('41', 2, 1, 1),
---     ('42', 2, 1, 1),
---     ('ROJO', 3, 1, 1),
---     ('NEGRO', 3, 1, 1),
---     ('BLANCO', 3, 1, 1),
---     ('128GB', 4, 1, 1),
---     ('256GB', 4, 1, 1),
---     ('CHOCOLATE', 5, 1, 1),
---     ('FRESA', 5, 1, 1);
-
--- INSERT INTO variant_attribute (id_variant_product, created_user, update_user)
--- VALUES
---     (1, 1, 1), (2, 1, 1), (3, 1, 1),
---     (4, 1, 1), (5, 1, 1),
---     (6, 1, 1), (7, 1, 1),
---     (8, 1, 1), (9, 1, 1),
---     (10, 1, 1), (11, 1, 1);
-
--- INSERT INTO variant_attribute_attribute_value (id_attribute_value, id_variant)
--- VALUES
---     (7, 1), (1, 1),     -- Polo rojo S
---     (7, 2), (2, 2),     -- Polo rojo M
---     (8, 3), (1, 3),     -- Polo negro S
---     (3, 4),              -- Jeans talla 30
---     (4, 5),              -- Jeans talla 32
---     (9, 6), (5, 6),     -- Zapatilla blanca 41
---     (8, 7), (6, 7),     -- Zapatilla negra 42
---     (10, 8),             -- Smartwatch 128GB
---     (11, 9),             -- Smartwatch 256GB
---     (12, 10),            -- Whey sabor chocolate
---     (13, 11);            -- Whey sabor fresa
-
--- INSERT INTO product_img (name, image_url, id_variant_attribute, created_user, update_user)
--- VALUES
---     ('Polo Clásico Rojo', 'img/products/polo_rojo.jpg', 1, 1, 1),
---     ('Polo Clásico Negro', 'img/products/polo_negro.jpg', 3, 1, 1),
---     ('Jeans Slim Fit Azul', 'img/products/jeans_azul.jpg', 4, 1, 1),
---     ('Chaqueta Cuero', 'img/products/chaqueta_cuero.jpg', 5, 1, 1),
---     ('Zapatilla Blanca', 'img/products/zapatilla_blanca.jpg', 6, 1, 1),
---     ('Zapatilla Negra', 'img/products/zapatilla_negra.jpg', 7, 1, 1),
---     ('Smartwatch 128GB', 'img/products/smartwatch_128.jpg', 8, 1, 1),
---     ('Smartwatch 256GB', 'img/products/smartwatch_256.jpg', 9, 1, 1),
---     ('Proteína Chocolate', 'img/products/whey_chocolate.jpg', 10, 1, 1),
---     ('Proteína Fresa', 'img/products/whey_fresa.jpg', 11, 1, 1);
+;
