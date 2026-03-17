@@ -1,3 +1,12 @@
+# application.yml
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+jwt:
+  secret: ${JWT_SECRET:mi_clave_jwt_super_segura_de_mas_de_64_caracteres_2025_backend_tienda_virtual}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+server:
+  address: 0.0.0.0
+  port: ${SERVER_PORT:8080}

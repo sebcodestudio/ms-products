@@ -1,2 +1,2 @@
-# online-store-backend
+# ms-products
 Ecommerce Backend / Springboot / Java 21
