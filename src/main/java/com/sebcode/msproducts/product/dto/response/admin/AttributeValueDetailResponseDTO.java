@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.sebcode.msproducts.common.response.AuditableEntityResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -11,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @JsonPropertyOrder({"id", "value", "attributeTypeId", "attributeTypeName", "displayOrder"})
 public class AttributeValueDetailResponseDTO extends AuditableEntityResponseDTO {
     private Long id;
