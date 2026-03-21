@@ -21,5 +21,5 @@ public class VariantAttributeDetailResponseDTO extends AuditableEntityResponseDT
     private Long attributeTypeId;
     private String attributeTypeName;
     private Long attributeValueId;
-    private String attributeValue;
+    private String attributeValueName;
 }

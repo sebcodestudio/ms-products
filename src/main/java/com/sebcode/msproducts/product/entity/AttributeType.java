@@ -47,8 +47,7 @@ public class AttributeType extends AuditableEntity {
     private Boolean isVisual; // true si afecta a las imágenes (Color, Sabor)
 
     @OneToMany(mappedBy = "attributeType", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<AttributeValue> attributeValues = new ArrayList<>();
+    private List<AttributeValue> attributeValues;
 
     @Override
     public void prePersist() {
@@ -59,6 +58,12 @@ public class AttributeType extends AuditableEntity {
         if (displayOrder == null) {
             displayOrder = 0;
         }
+    }
+
+    @PostLoad
+    @PrePersist
+    private void initCollections() {
+        if (attributeValues == null) attributeValues = new ArrayList<>();
     }
 
 }

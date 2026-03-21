@@ -13,6 +13,13 @@ public interface AttributeTypeMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "attributeValues", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
+    @Mapping(target = "createdUser", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updateUser", ignore = true)
+    @Mapping(target = "updateAt", ignore = true)
     AttributeType toEntity(AttributeTypeRequestDTO attributeTypeRequestDTO);
 
     AttributeTypeDetailResponseDTO toDetailResponseDTO(AttributeType attributeType);
@@ -21,6 +28,13 @@ public interface AttributeTypeMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "attributeValues", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
+    @Mapping(target = "createdUser", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updateUser", ignore = true)
+    @Mapping(target = "updateAt", ignore = true)
     void updateEntityFromDTO(AttributeTypeRequestDTO attributeTypeRequestDTO, @MappingTarget AttributeType attributeType);
 
 }

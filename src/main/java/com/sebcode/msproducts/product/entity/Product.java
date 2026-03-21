@@ -52,8 +52,7 @@ public class Product extends AuditableEntity {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    @Builder.Default
-    private List<VariantProduct> variantProducts = new ArrayList<>();
+    private List<VariantProduct> variantProducts;
 
 //    @ManyToMany(fetch = FetchType.LAZY)
 //    @JoinTable(
@@ -72,6 +71,12 @@ public class Product extends AuditableEntity {
     protected void prePersist() {
         super.prePersist();
         if (this.score == null) this.score = BigDecimal.ZERO;
+    }
+
+    @PostLoad
+    @PrePersist
+    private void initCollections() {
+        if (variantProducts == null) variantProducts = new ArrayList<>();
     }
 
     // ============================================

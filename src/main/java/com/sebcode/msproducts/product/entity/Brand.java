@@ -39,7 +39,12 @@ public class Brand extends AuditableEntity {
 
     @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    @Builder.Default
-    private List<Product> product = new ArrayList<>();
+    private List<Product> product;
+
+    @PostLoad
+    @PrePersist
+    private void initCollections() {
+        if (product == null) product = new ArrayList<>();
+    }
 
 }

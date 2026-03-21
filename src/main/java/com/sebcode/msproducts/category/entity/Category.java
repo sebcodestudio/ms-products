@@ -4,17 +4,19 @@ import com.sebcode.msproducts.common.entity.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "categories", indexes = {
@@ -47,5 +49,11 @@ public class Category extends AuditableEntity {
 
     @OneToMany(mappedBy = "category")
     private List<Subcategory> subcategory;
+
+    @PostLoad
+    @PrePersist
+    private void initCollections() {
+        if (subcategory == null) subcategory = new ArrayList<>();
+    }
 
 }

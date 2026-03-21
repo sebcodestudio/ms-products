@@ -14,24 +14,45 @@ import org.mapstruct.Named;
 public interface ProductImageMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "attributeType", source = "attributeTypeId", qualifiedByName = "mapAttributeType")
+//    @Mapping(target = "attributeType", source = "attributeTypeId", qualifiedByName = "mapAttributeType")
+    @Mapping(target = "variantProduct", ignore = true)
+    @Mapping(target = "attributeValue", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
+    @Mapping(target = "createdUser", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updateUser", ignore = true)
+    @Mapping(target = "updateAt", ignore = true)
     ProductImage toEntity(ProductImageRequestDTO productImageRequestDTO);
 
-    @Mapping(target = "attributeTypeId", source = "attributeType.id")
-    @Mapping(target = "attributeTypeName", source = "attributeType.name")
+    @Mapping(target = "attributeValueId", source = "attributeValue.id")
+    @Mapping(target = "attributeValueName", source = "attributeValue.value")
+    @Mapping(target = "variantProductId", source = "variantProduct.id")
+    @Mapping(target = "variantProductSku", source = "variantProduct.sku")
     ProductImageDetailResponseDTO toDetailResponseDTO(ProductImage productImage);
 
-    @Mapping(target = "attributeTypeName", source = "attributeType.name")
+    @Mapping(target = "attributeValueName", source = "attributeValue.value")
+    @Mapping(target = "variantProductSku", source = "variantProduct.sku")
     ProductImageListResponseDTO toListResponseDTO(ProductImage productImage);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "variantProduct", ignore = true)
+    @Mapping(target = "attributeValue", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
+    @Mapping(target = "createdUser", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updateUser", ignore = true)
+    @Mapping(target = "updateAt", ignore = true)
     void updateEntityFromDTO(ProductImageRequestDTO productImageRequestDTO, @MappingTarget ProductImage productImage);
 
-    @Named("mapAttributeType")
-    default AttributeType mapAttributeType(Long id) {
-        if (id == null) return null;
-        AttributeType attributeType = new AttributeType();
-        attributeType.setId(id);
-        return attributeType;
-    }
+//    @Named("mapAttributeType")
+//    default AttributeType mapAttributeType(Long id) {
+//        if (id == null) return null;
+//        AttributeType attributeType = new AttributeType();
+//        attributeType.setId(id);
+//        return attributeType;
+//    }
 }

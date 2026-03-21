@@ -5,12 +5,17 @@ import com.sebcode.msproducts.product.entity.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Builder
+@SuperBuilder
 @Getter
 @Setter
 @AllArgsConstructor
@@ -48,7 +53,13 @@ public class Subcategory extends AuditableEntity {
     @JoinColumn(name = "id_category")
     private Category category;
 
-    @ManyToMany(mappedBy = "subcategories")
-    private List<Product> products;
+//    @ManyToMany(mappedBy = "subcategories")
+//    private List<Product> products;
+
+//    @PostLoad
+//    @PrePersist
+//    private void initCollections() {
+//        if (products == null) products = new ArrayList<>();
+//    }
 
 }

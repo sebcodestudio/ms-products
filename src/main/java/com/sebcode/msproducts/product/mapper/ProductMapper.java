@@ -12,11 +12,17 @@ import org.mapstruct.MappingTarget;
 public interface ProductMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "score", ignore = true)
+    @Mapping(target = "brand", ignore = true)
     @Mapping(target = "variantProducts", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
+    @Mapping(target = "createdUser", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updateUser", ignore = true)
+    @Mapping(target = "updateAt", ignore = true)
     Product toEntity(ProductRequestDTO productRequestDTO);
-
-    @Mapping(target = "brand", source = "brand.name")
-    ProductDetailResponseDTO toResponseDetailDTO(Product product);
 
     @Mapping(target = "brandId", source = "brand.id")
     @Mapping(target = "brand", source = "brand.name")
@@ -26,7 +32,16 @@ public interface ProductMapper {
     ProductListResponseDTO toListResponseDTO(Product product);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "score", ignore = true)
+    @Mapping(target = "brand", ignore = true)
     @Mapping(target = "variantProducts", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
+    @Mapping(target = "createdUser", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updateUser", ignore = true)
+    @Mapping(target = "updateAt", ignore = true)
     void updateEntityFromDTO(ProductRequestDTO productRequestDTO, @MappingTarget Product product);
 
 }

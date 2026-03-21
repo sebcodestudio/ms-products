@@ -16,5 +16,5 @@ public class VariantAttributeListResponseDTO {
     //    private Long attributeTypeId;
     private String attributeTypeName;
     //    private Long attributeValueId;
-    private String attributeValue;
+    private String attributeValueName;
 }
