@@ -4,7 +4,7 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
 jwt:
-  secret: ${JWT_SECRET:mi_clave_jwt_super_segura_de_mas_de_64_caracteres_2025_backend_tienda_virtual}
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
 
 server:
