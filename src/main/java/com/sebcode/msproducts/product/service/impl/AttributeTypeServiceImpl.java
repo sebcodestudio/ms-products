@@ -9,6 +9,7 @@ import com.sebcode.msproducts.product.mapper.AttributeTypeMapper;
 import com.sebcode.msproducts.product.repository.AttributeTypeRepository;
 import com.sebcode.msproducts.product.service.IAttributeTypeService;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
+import com.sun.jdi.request.DuplicateRequestException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class AttributeTypeServiceImpl implements IAttributeTypeService {
             attributeType.setDeleteAt(null);
             attributeTypeMapper.updateEntityFromDTO(attributeTypeRequestDTO, attributeType);
         } else if (existing.isPresent()) {
-            throw new NotFoundException("Attribute type with name '" + attributeTypeRequestDTO.getName() + "' already exists");
+            throw new DuplicateRequestException("Attribute type with name '" + attributeTypeRequestDTO.getName() + "' already exists");
         } else {
             attributeType = attributeTypeMapper.toEntity(attributeTypeRequestDTO);
         }

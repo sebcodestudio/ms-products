@@ -1,5 +1,6 @@
 package com.sebcode.msproducts.product.service.impl;
 
+import com.sebcode.msproducts.exception.DuplicateResourceException;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.AttributeValueRequestDTO;
 import com.sebcode.msproducts.product.dto.response.admin.AttributeValueDetailResponseDTO;
@@ -55,7 +56,7 @@ public class AttributeValueServiceImpl implements IAttributeValueService {
             attributeValue.setDeleteAt(null);
             attributeValueMapper.updateEntityFromDTO(attributeValueRequestDTO, attributeValue);
         } else if (existing.isPresent()) {
-            throw new NotFoundException("Attribute value with name '" + attributeValueRequestDTO.getValue() + "' already exists");
+            throw new DuplicateResourceException("Attribute value with name '" + attributeValueRequestDTO.getValue() + "' already exists");
         } else {
             attributeValue = attributeValueMapper.toEntity(attributeValueRequestDTO);
         }

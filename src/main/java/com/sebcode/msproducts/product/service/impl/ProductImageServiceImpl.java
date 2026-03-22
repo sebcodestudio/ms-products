@@ -1,12 +1,12 @@
 package com.sebcode.msproducts.product.service.impl;
 
+import com.sebcode.msproducts.exception.DuplicateResourceException;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.ProductImageRequestDTO;
 import com.sebcode.msproducts.product.dto.response.admin.ProductImageDetailResponseDTO;
 import com.sebcode.msproducts.product.dto.response.admin.ProductImageListResponseDTO;
 import com.sebcode.msproducts.product.entity.ProductImage;
 import com.sebcode.msproducts.product.mapper.ProductImageMapper;
-import com.sebcode.msproducts.product.repository.AttributeTypeRepository;
 import com.sebcode.msproducts.product.repository.AttributeValueRepository;
 import com.sebcode.msproducts.product.repository.ProductImageRepository;
 import com.sebcode.msproducts.product.repository.VariantProductRepository;
@@ -60,7 +60,7 @@ public class ProductImageServiceImpl implements IProductImageService {
             productImage.setDeleteAt(null);
             productImageMapper.updateEntityFromDTO(productImageRequestDTO, productImage);
         } else if (existing.isPresent()) {
-            throw new NotFoundException("Product image with name '" + productImageRequestDTO.getImageUrl() + "' already exists");
+            throw new DuplicateResourceException("Product image with name '" + productImageRequestDTO.getImageUrl() + "' already exists");
         } else {
             productImage = productImageMapper.toEntity(productImageRequestDTO);
         }

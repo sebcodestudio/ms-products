@@ -1,5 +1,6 @@
 package com.sebcode.msproducts.product.service.impl;
 
+import com.sebcode.msproducts.exception.DuplicateResourceException;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.BrandRequestDTO;
 import com.sebcode.msproducts.product.dto.response.admin.BrandDetailResponseDTO;
@@ -47,7 +48,7 @@ public class BrandServiceImpl implements IBrandService {
             brand.setDeleteAt(null);
             brandMapper.updateEntityFromDTO(brandRequestDTO, brand);
         } else if (existing.isPresent()) {
-            throw new NotFoundException("Brand with name '" + brandRequestDTO.getName() + "' already exists");
+            throw new DuplicateResourceException("Brand with name '" + brandRequestDTO.getName() + "' already exists");
         } else {
             brand = brandMapper.toEntity(brandRequestDTO);
         }

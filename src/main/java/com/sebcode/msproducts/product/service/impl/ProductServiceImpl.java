@@ -1,5 +1,6 @@
 package com.sebcode.msproducts.product.service.impl;
 
+import com.sebcode.msproducts.exception.DuplicateResourceException;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.ProductRequestDTO;
 import com.sebcode.msproducts.product.dto.request.ProductRequestDTO;
@@ -52,7 +53,7 @@ public class ProductServiceImpl implements IProductService {
             product.setDeleteAt(null);
             productMapper.updateEntityFromDTO(productRequestDTO, product);
         } else if (existing.isPresent()) {
-            throw new NotFoundException("Product with name '" + productRequestDTO.getName() + "' already exists");
+            throw new DuplicateResourceException("Product with name '" + productRequestDTO.getName() + "' already exists");
         } else {
             product = productMapper.toEntity(productRequestDTO);
         }
