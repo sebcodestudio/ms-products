@@ -3,7 +3,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect # org.hibernate.dialect.MySQLDialect
     defer-datasource-initialization: true
   datasource:
@@ -13,18 +13,16 @@ spring:
     driver-class-name: org.postgresql.Driver # driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
-      mode: never
-      separator: "$$"
+      mode: never # separator: "$$"
   cache:
     type: redis
     redis:
       time-to-live: 600000 # 10 minutos por defecto
       cache-null-values: false
-
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       timeout: 2000ms
       lettuce:
