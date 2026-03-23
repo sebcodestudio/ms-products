@@ -4,16 +4,13 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    #    org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect # org.hibernate.dialect.MySQLDialect
     defer-datasource-initialization: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
-    #    driver-class-name: com.mysql.cj.jdbc.Driver
-    #     driver-class-name: org.hibernate.dialect.PostgreSQLDialect
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: org.postgresql.Driver # driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
       mode: never
@@ -24,20 +21,14 @@ spring:
       time-to-live: 600000 # 10 minutos por defecto
       cache-null-values: false
 
-    data:
-      redis:
-        host: localhost
-        port: 6379
-        password: ${REDIS_PASSWORD:}
-        timeout: 2000ms
-        lettuce:
-          pool:
-            max-active: 8
-            max-idle: 8
-            min-idle: 2
-#jwt:
-#  secret: ${JWT_SECRET}
-#  expiration: ${JWT_EXPIRATION}
-#server:
-#  address: 0.0.0.0
-#  port: ${SERVER_PORT}
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
