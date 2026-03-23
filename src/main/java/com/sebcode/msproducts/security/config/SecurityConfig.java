@@ -3,6 +3,7 @@ package com.sebcode.msproducts.security.config;
 import com.sebcode.msproducts.security.config.security.JwtAuthenticationEntryPoint;
 import com.sebcode.msproducts.security.config.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +32,9 @@ public class SecurityConfig {
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${core.allowed-origins}")
+    private String allowedOriginsRaw;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -70,9 +75,11 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        List<String> origins = Arrays.asList(allowedOriginsRaw.split(","));
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:4200"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
 
@@ -81,18 +88,4 @@ public class SecurityConfig {
         return source;
     }
 
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .cors(Customizer.withDefaults()) // 🔥 Habilita CORS
-    //             .csrf(csrf -> csrf.disable()) // 🔒 Desactiva CSRF para desarrollo
-    //             .authorizeHttpRequests(auth -> auth
-    //                     .requestMatchers("/api/**").permitAll() // 🔓 Permite acceso a tu API
-    //                     .anyRequest().authenticated()
-    //             )
-    //             ;
-    // .httpBasic(Customizer.withDefaults()); // 💳 Si usas autenticación básica
-
-    //     return http.build();
-    // }
 }
