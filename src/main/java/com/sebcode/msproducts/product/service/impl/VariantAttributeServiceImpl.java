@@ -44,11 +44,11 @@ public class VariantAttributeServiceImpl implements IVariantAttributeService {
     @Transactional
     public VariantAttributeDetailResponseDTO createVariantAttribute(VariantAttributeRequestDTO variantAttributeRequestDTO, CustomUserPrincipal principal) {
         variantProductRepository.findById(variantAttributeRequestDTO.getVariantProductId())
-                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getVariantProductId()+ "' don't exists"));
+                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getVariantProductId() + "' don't exists"));
         attributeTypeRepository.findById(variantAttributeRequestDTO.getAttributeTypeId())
-                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeTypeId()+ "' don't exists"));
+                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeTypeId() + "' don't exists"));
         attributeValueRepository.findById(variantAttributeRequestDTO.getAttributeValueId())
-                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeValueId()+ "' don't exists"));
+                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeValueId() + "' don't exists"));
 
 //        Optional<VariantAttribute> existing = variantAttributeRepository
 //                .findByValueAndAttributeTypeId(variantAttributeRequestDTO.getValue(), variantAttributeRequestDTO.getAttributeTypeId());
@@ -128,11 +128,11 @@ public class VariantAttributeServiceImpl implements IVariantAttributeService {
                 .orElseThrow(() -> new NotFoundException("Variant attribute with ID " + id + " not found"));
 
         variantProductRepository.findById(variantAttributeRequestDTO.getVariantProductId())
-                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getVariantProductId()+ "' don't exists"));
+                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getVariantProductId() + "' don't exists"));
         attributeTypeRepository.findById(variantAttributeRequestDTO.getAttributeTypeId())
-                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeTypeId()+ "' don't exists"));
+                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeTypeId() + "' don't exists"));
         attributeValueRepository.findById(variantAttributeRequestDTO.getAttributeValueId())
-                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeValueId()+ "' don't exists"));
+                .orElseThrow(() -> new NotFoundException("Variant attribute with id '" + variantAttributeRequestDTO.getAttributeValueId() + "' don't exists"));
 
         variantAttributeMapper.updateEntityFromDTO(variantAttributeRequestDTO, variantAttribute);
 
