@@ -5,10 +5,7 @@ import com.sebcode.msproducts.product.entity.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -21,7 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "subcategories", indexes = {
-        @Index(name = "idx_imageUrl", columnList = "id_imageUrl"),
         @Index(name = "idx_category", columnList = "id_category"),
         @Index(name = "idx_state_deleted", columnList = "state, is_deleted"),
         @Index(name = "idx_name", columnList = "name")
@@ -53,13 +49,7 @@ public class Subcategory extends AuditableEntity {
     @JoinColumn(name = "id_category")
     private Category category;
 
-//    @ManyToMany(mappedBy = "subcategories")
-//    private List<Product> products;
-
-//    @PostLoad
-//    @PrePersist
-//    private void initCollections() {
-//        if (products == null) products = new ArrayList<>();
-//    }
-
+    @ManyToMany(mappedBy = "subcategories", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Product> products = new ArrayList<>();
 }

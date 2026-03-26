@@ -42,6 +42,10 @@ public class CompanyUser {
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT TRUE")
     private Boolean active = true;
 
+    @Builder.Default
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean isDeleted = false;
+
     @Column(name = "created_user", updatable = false)
     private Long createdUser;
 

@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,51 +17,48 @@ public interface VariantProductRepository
 
     Optional<VariantProduct> findBySku(String sku);
 
-    //            JOIN p.subcategories s
-//            JOIN s.category c//            AND c.id = :categoryId
-    @Query(value = """
-            SELECT v FROM VariantProduct v
-            JOIN v.variantAttributes va
-            JOIN v.productImages pi
+    @Query("""
+            SELECT DISTINCT v FROM VariantProduct v
             JOIN v.product p
-            WHERE v.state = true AND p.state = true
+            JOIN p.subcategories s
+            JOIN s.category c
+            WHERE v.state = true AND v.isDeleted = false
+            AND p.state = true AND p.isDeleted = false
+            AND c.id = :categoryId
             ORDER BY v.soldCount DESC
             """)
-    List<VariantProduct> findByCategoryId(Long categoryId);
+    List<VariantProduct> findByCategoryId(@Param("categoryId") Long categoryId);
 
-    //            JOIN p.subcategories s//            AND s.id = :subcategoryId
-    @Query(value = """
-            SELECT v FROM VariantProduct v
-            JOIN v.variantAttributes va
-            JOIN v.productImages pi
+    @Query("""
+            SELECT DISTINCT v FROM VariantProduct v
             JOIN v.product p
-            WHERE v.state = true AND p.state = true
+            JOIN p.subcategories s
+            WHERE v.state = true AND v.isDeleted = false
+            AND p.state = true AND p.isDeleted = false
+            AND s.id = :subcategoryId
             ORDER BY v.soldCount DESC
             """)
-    List<VariantProduct> findBySubcategoryId(Long subcategoryId);
+    List<VariantProduct> findBySubcategoryId(@Param("subcategoryId") Long subcategoryId);
 
     @Query("""
             SELECT v FROM VariantProduct v
-            JOIN v.variantAttributes va
-            JOIN v.productImages pi
             JOIN v.product p
-            WHERE v.state = true AND p.state = true
+            WHERE v.state = true AND v.isDeleted = false
+            AND p.state = true AND p.isDeleted = false
             ORDER BY v.soldCount DESC
             """)
     List<VariantProduct> findBestSelling(Pageable pageable);
 
-    //            JOIN p.subcategories s
-//            JOIN s.category c//            AND c.id = :categoryId
     @Query("""
-            SELECT v FROM VariantProduct v
-            JOIN v.variantAttributes va
-            JOIN v.productImages pi
+            SELECT DISTINCT v FROM VariantProduct v
             JOIN v.product p
-            WHERE v.state = true AND p.state = true AND v.discount > 0
-            AND CURRENT_DATE BETWEEN v.discountStartDate
-            AND v.discountEndDate
-            ORDER BY v.soldCount DESC
+            JOIN p.subcategories s
+            JOIN s.category c
+            WHERE v.state = true AND v.isDeleted = false
+            AND p.state = true AND p.isDeleted = false
+            AND v.discount > 0
+            AND c.id = :categoryId
+            ORDER BY v.discount DESC
             """)
-    List<VariantProduct> findDiscountedByCategoryId(Long categoryId, Pageable pageable);
-
+    List<VariantProduct> findDiscountedByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
 }

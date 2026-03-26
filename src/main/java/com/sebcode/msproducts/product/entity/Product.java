@@ -1,5 +1,6 @@
 package com.sebcode.msproducts.product.entity;
 
+import com.sebcode.msproducts.category.entity.Subcategory;
 import com.sebcode.msproducts.common.entity.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -50,18 +51,19 @@ public class Product extends AuditableEntity {
     @JoinColumn(name = "id_brand", nullable = false, foreignKey = @ForeignKey(name = "fk_product_brand"))
     private Brand brand;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "product_subcategory",
+            joinColumns = @JoinColumn(name = "id_product", foreignKey = @ForeignKey(name = "fk_ps_product")),
+            inverseJoinColumns = @JoinColumn(name = "id_subcategory", foreignKey = @ForeignKey(name = "fk_ps_subcategory"))
+    )
+    @Builder.Default
+    private List<Subcategory> subcategories = new ArrayList<>();
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<VariantProduct> variantProducts;
-
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    @JoinTable(
-//            name = "product_subcategory",
-//            joinColumns = @JoinColumn(name = "id_product", foreignKey = @ForeignKey(name = "fk_ps_product")),
-//            inverseJoinColumns = @JoinColumn(name = "id_subcategory", foreignKey = @ForeignKey(name = "fk_ps_subcategory"))
-//    )
-//    @Builder.Default
-//    private List<Subcategory> subcategories = new ArrayList<>();
+    @Builder.Default
+    private List<VariantProduct> variantProducts = new ArrayList<>();
 
     // ============================================
     // LIFECYCLE CALLBACKS
@@ -71,40 +73,25 @@ public class Product extends AuditableEntity {
     protected void prePersist() {
         super.prePersist();
         if (this.score == null) this.score = BigDecimal.ZERO;
-    }
-
-    @PostLoad
-    @PrePersist
-    private void initCollections() {
-        if (variantProducts == null) variantProducts = new ArrayList<>();
+        if (this.variantProducts == null) this.variantProducts = new ArrayList<>();
+        if (this.subcategories == null) this.subcategories = new ArrayList<>();
     }
 
     // ============================================
     // DOMAIN LOGIC METHODS
     // ============================================
 
-    /**
-     * Verifica si el producto está disponible para la venta
-     *
-     * @return true si está activo, no eliminado y tiene al menos una variante disponible
-     */
     public boolean isAvailable() {
         return Boolean.TRUE.equals(this.state) &&
                 Boolean.FALSE.equals(this.isDeleted) &&
                 hasAvailableVariants();
     }
 
-    /**
-     * Verifica si tiene variantes disponibles
-     */
     public boolean hasAvailableVariants() {
         return variantProducts != null &&
                 variantProducts.stream().anyMatch(VariantProduct::isAvailable);
     }
 
-    /**
-     * Obtiene la variante con menor precio
-     */
     public BigDecimal getMinPrice() {
         return variantProducts.stream()
                 .filter(VariantProduct::isAvailable)
@@ -113,9 +100,6 @@ public class Product extends AuditableEntity {
                 .orElse(BigDecimal.ZERO);
     }
 
-    /**
-     * Obtiene la variante con mayor precio
-     */
     public BigDecimal getMaxPrice() {
         return variantProducts.stream()
                 .filter(VariantProduct::isAvailable)
@@ -124,9 +108,6 @@ public class Product extends AuditableEntity {
                 .orElse(BigDecimal.ZERO);
     }
 
-    /**
-     * Calcula el stock total de todas las variantes
-     */
     public int getTotalStock() {
         return variantProducts.stream()
                 .filter(v -> Boolean.TRUE.equals(v.getState()) && Boolean.FALSE.equals(v.getIsDeleted()))
@@ -134,50 +115,27 @@ public class Product extends AuditableEntity {
                 .sum();
     }
 
-    /**
-     * Calcula el total de unidades vendidas
-     */
     public int getTotalSold() {
         return variantProducts.stream()
                 .mapToInt(VariantProduct::getSoldCount)
                 .sum();
     }
 
-    /**
-     * Añade una variante al producto
-     */
     public void addVariant(VariantProduct variant) {
         variantProducts.add(variant);
         variant.setProduct(this);
     }
 
-    /**
-     * Remueve una variante del producto
-     */
-    public void removeVariant(VariantProduct variant) {
-        variantProducts.remove(variant);
-        variant.setProduct(null);
+    public void addSubcategory(Subcategory subcategory) {
+        if (!subcategories.contains(subcategory)) {
+            subcategories.add(subcategory);
+        }
     }
 
-    /**
-     * Añade una subcategoría
-     */
-//    public void addSubcategory(Subcategory subcategory) {
-//        if (!subcategories.contains(subcategory)) {
-//            subcategories.add(subcategory);
-//        }
-//    }
+    public void removeSubcategory(Subcategory subcategory) {
+        subcategories.remove(subcategory);
+    }
 
-    /**
-     * Remueve una subcategoría
-     */
-//    public void removeSubcategory(Subcategory subcategory) {
-//        subcategories.remove(subcategory);
-//    }
-
-    /**
-     * Actualiza el score (rating promedio)
-     */
     public void updateScore(BigDecimal newScore) {
         if (newScore == null || newScore.compareTo(BigDecimal.ZERO) < 0 ||
                 newScore.compareTo(new BigDecimal("5.0")) > 0) {
@@ -185,10 +143,6 @@ public class Product extends AuditableEntity {
         }
         this.score = newScore;
     }
-
-    // ============================================
-    // EQUALS & HASHCODE
-    // ============================================
 
     @Override
     public boolean equals(Object o) {
@@ -205,10 +159,6 @@ public class Product extends AuditableEntity {
 
     @Override
     public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", state=" + state +
-                '}';
+        return "Product{id=" + id + ", name='" + name + "', state=" + state + '}';
     }
 }
