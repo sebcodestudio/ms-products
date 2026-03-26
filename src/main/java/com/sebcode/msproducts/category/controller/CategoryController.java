@@ -4,6 +4,7 @@ import com.sebcode.msproducts.category.dto.request.CategoryRequestDTO;
 import com.sebcode.msproducts.category.dto.response.CategoryDetailResponseDTO;
 import com.sebcode.msproducts.category.dto.response.CategoryListResponseDTO;
 import com.sebcode.msproducts.category.service.ICategoryService;
+import com.sebcode.msproducts.common.response.PageResponse;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -86,7 +87,7 @@ public class CategoryController {
     @GetMapping("/search")
     @Operation(summary = "Search categorys", description = "Search and filter categorys with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<Page<CategoryListResponseDTO>> search(
+    public ResponseEntity<PageResponse<CategoryListResponseDTO>> search(
             @Parameter(description = "Search term for category name or description")
             @RequestParam(required = false) String search,
 
@@ -113,7 +114,7 @@ public class CategoryController {
                 search, isVisual, page, size, sortBy);
 
         log.info("Search completed. Found {} category", categorys.getTotalElements());
-        return ResponseEntity.ok(categorys);
+        return ResponseEntity.ok(PageResponse.of(categorys));
     }
 
     @PutMapping("/{id}")

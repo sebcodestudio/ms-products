@@ -1,10 +1,10 @@
 package com.sebcode.msproducts.product.controller;
 
+import com.sebcode.msproducts.common.response.PageResponse;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.ProductRequestDTO;
 import com.sebcode.msproducts.product.dto.response.admin.ProductDetailResponseDTO;
 import com.sebcode.msproducts.product.dto.response.admin.ProductListResponseDTO;
-import com.sebcode.msproducts.product.dto.response.admin.ProductDetailResponseDTO;
 import com.sebcode.msproducts.product.service.IProductService;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,7 +80,7 @@ public class ProductController {
     @GetMapping("/search")
     @Operation(summary = "Search products", description = "Search and filter products with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<Page<ProductListResponseDTO>> search(
+    public ResponseEntity<PageResponse<ProductListResponseDTO>> search(
             @Parameter(description = "Search term for product name or description")
             @RequestParam(required = false) String search,
 
@@ -107,7 +107,7 @@ public class ProductController {
                 search, isVisual, page, size, sortBy);
 
         log.info("Search completed. Found {} attribute Type", products.getTotalElements());
-        return ResponseEntity.ok(products);
+        return ResponseEntity.ok(PageResponse.of(products));
     }
 
     @PutMapping("/{id}")

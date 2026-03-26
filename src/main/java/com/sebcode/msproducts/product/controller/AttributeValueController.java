@@ -18,6 +18,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.sebcode.msproducts.common.response.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +79,7 @@ public class AttributeValueController {
     @GetMapping("/search")
     @Operation(summary = "Search attribute values", description = "Search and filter attribute values with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<Page<AttributeValueListResponseDTO>> search(
+    public ResponseEntity<PageResponse<AttributeValueListResponseDTO>> search(
             @Parameter(description = "Search term for attribute value name or description")
             @RequestParam(required = false) String search,
 
@@ -105,7 +106,7 @@ public class AttributeValueController {
                 search, isVisual, page, size, sortBy);
 
         log.info("Search completed. Found {} attribute value", attributeValues.getTotalElements());
-        return ResponseEntity.ok(attributeValues);
+        return ResponseEntity.ok(PageResponse.of(attributeValues));
     }
 
     @PutMapping("/{id}")

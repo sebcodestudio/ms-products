@@ -1,5 +1,6 @@
 package com.sebcode.msproducts.product.controller;
 
+import com.sebcode.msproducts.common.response.PageResponse;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.BrandRequestDTO;
 import com.sebcode.msproducts.product.dto.response.admin.BrandDetailResponseDTO;
@@ -79,7 +80,7 @@ public class BrandController {
     @GetMapping("/search")
     @Operation(summary = "Search brands", description = "Search and filter brands with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<Page<BrandListResponseDTO>> search(
+    public ResponseEntity<PageResponse<BrandListResponseDTO>> search(
             @Parameter(description = "Search term for brand name or description")
             @RequestParam(required = false) String search,
 
@@ -106,7 +107,7 @@ public class BrandController {
                 search, isVisual, page, size, sortBy);
 
         log.info("Search completed. Found {} attribute Type", brands.getTotalElements());
-        return ResponseEntity.ok(brands);
+        return ResponseEntity.ok(PageResponse.of(brands));
     }
 
     @PutMapping("/{id}")

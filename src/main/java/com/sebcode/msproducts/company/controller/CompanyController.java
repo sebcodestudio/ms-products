@@ -1,5 +1,6 @@
 package com.sebcode.msproducts.company.controller;
 
+import com.sebcode.msproducts.common.response.PageResponse;
 import com.sebcode.msproducts.company.dto.request.CompanyRequestDTO;
 import com.sebcode.msproducts.company.dto.response.CompanyResponseDTO;
 import com.sebcode.msproducts.company.enums.CompanySort;
@@ -74,7 +75,7 @@ public class CompanyController {
 
     @GetMapping
     @Operation(summary = "Search companies (Admin only)")
-    public ResponseEntity<Page<CompanyResponseDTO>> search(
+    public ResponseEntity<PageResponse<CompanyResponseDTO>> search(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean active,
             @RequestParam(defaultValue = "0") int page,
@@ -83,7 +84,8 @@ public class CompanyController {
         log.info("GET /api/v1/admin/companies - Search: {}", search);
         Page<CompanyResponseDTO> companies = companyService.searchCompanies(search, active, page, size, sortBy);
         log.debug("Search result size: {}", companies.getTotalElements());
-        return ResponseEntity.ok(companies);
+        log.debug("Search result size: {}", companies.getTotalElements());
+        return ResponseEntity.ok(PageResponse.of(companies));
     }
 
 }

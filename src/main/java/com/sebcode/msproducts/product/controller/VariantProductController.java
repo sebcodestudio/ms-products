@@ -1,8 +1,8 @@
 package com.sebcode.msproducts.product.controller;
 
+import com.sebcode.msproducts.common.response.PageResponse;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.VariantProductRequestDTO;
-import com.sebcode.msproducts.product.dto.response.admin.ProductDetailResponseDTO;
 import com.sebcode.msproducts.product.dto.response.admin.VariantProductDetailAdminResponseDTO;
 import com.sebcode.msproducts.product.dto.response.admin.VariantProductListAdminResponseDTO;
 import com.sebcode.msproducts.product.dto.response.customer.VariantProductDetailPublicResponseDTO;
@@ -85,7 +85,7 @@ public class VariantProductController {
     @GetMapping("/admin/search")
     @Operation(summary = "Search variant products", description = "Search and filter variant products with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<Page<VariantProductListAdminResponseDTO>> searchAdmin(
+    public ResponseEntity<PageResponse<VariantProductListAdminResponseDTO>> searchAdmin(
             @Parameter(description = "Search term for variant product name or description")
             @RequestParam(required = false) String search,
 
@@ -134,7 +134,7 @@ public class VariantProductController {
                 category, subcategory, brand, score, search, minPrice, maxPrice, page, size, sortBy);
 
         log.info("Search completed. Found {} variant products admin", variantProducts.getTotalElements());
-        return ResponseEntity.ok(variantProducts);
+        return ResponseEntity.ok(PageResponse.of(variantProducts));
     }
 
     @GetMapping("/{id}")
@@ -159,7 +159,7 @@ public class VariantProductController {
     @GetMapping("/search-public")
     @Operation(summary = "Search variant products", description = "Search and filter variant products with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<Page<VariantProductListPublicResponseDTO>> searchPublic(
+    public ResponseEntity<PageResponse<VariantProductListPublicResponseDTO>> searchPublic(
             @Parameter(description = "Search term for product name or description")
             @RequestParam(required = false) String search,
 
@@ -208,7 +208,7 @@ public class VariantProductController {
                 category, subcategory, brand, score, search, minPrice, maxPrice, page, size, sortBy);
 
         log.info("Search completed. Found {} variant products public", variantProducts.getTotalElements());
-        return ResponseEntity.ok(variantProducts);
+        return ResponseEntity.ok(PageResponse.of(variantProducts));
     }
 
     @GetMapping("/categories/{categoryId}")

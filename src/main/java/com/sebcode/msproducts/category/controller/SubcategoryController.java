@@ -5,6 +5,7 @@ import com.sebcode.msproducts.category.dto.response.SubcategoryDetailResponseDTO
 import com.sebcode.msproducts.category.dto.response.SubcategoryListResponseDTO;
 import com.sebcode.msproducts.category.service.ISubcategoryService;
 import com.sebcode.msproducts.common.entity.AuditableEntity;
+import com.sebcode.msproducts.common.response.PageResponse;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -87,7 +88,7 @@ public class SubcategoryController extends AuditableEntity {
     @GetMapping("/search")
     @Operation(summary = "Search subcategorys", description = "Search and filter subcategorys with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<Page<SubcategoryListResponseDTO>> search(
+    public ResponseEntity<PageResponse<SubcategoryListResponseDTO>> search(
             @Parameter(description = "Search term for subcategory name or description")
             @RequestParam(required = false) String search,
 
@@ -114,7 +115,7 @@ public class SubcategoryController extends AuditableEntity {
                 search, isVisual, page, size, sortBy);
 
         log.info("Search completed. Found {} subcategory", subcategorys.getTotalElements());
-        return ResponseEntity.ok(subcategorys);
+        return ResponseEntity.ok(PageResponse.of(subcategorys));
     }
 
     @PutMapping("/{id}")
