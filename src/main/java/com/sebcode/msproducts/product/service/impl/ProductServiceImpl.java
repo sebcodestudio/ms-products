@@ -1,17 +1,16 @@
 package com.sebcode.msproducts.product.service.impl;
 
+import com.sebcode.msproducts.category.entity.Subcategory;
+import com.sebcode.msproducts.category.repository.SubcategoryRepository;
 import com.sebcode.msproducts.exception.DuplicateResourceException;
 import com.sebcode.msproducts.exception.NotFoundException;
 import com.sebcode.msproducts.product.dto.request.ProductRequestDTO;
-import com.sebcode.msproducts.product.dto.request.ProductRequestDTO;
 import com.sebcode.msproducts.product.dto.response.admin.ProductDetailResponseDTO;
 import com.sebcode.msproducts.product.dto.response.admin.ProductListResponseDTO;
-import com.sebcode.msproducts.product.dto.response.admin.ProductDetailResponseDTO;
-import com.sebcode.msproducts.product.entity.Product;
+import com.sebcode.msproducts.product.entity.Brand;
 import com.sebcode.msproducts.product.entity.Product;
 import com.sebcode.msproducts.product.mapper.ProductMapper;
-import com.sebcode.msproducts.product.mapper.ProductMapper;
-import com.sebcode.msproducts.product.repository.ProductRepository;
+import com.sebcode.msproducts.product.repository.BrandRepository;
 import com.sebcode.msproducts.product.repository.ProductRepository;
 import com.sebcode.msproducts.product.service.IProductService;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
@@ -37,29 +36,33 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements IProductService {
 
-    private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
+    private final ProductRepository     productRepository;
+    private final BrandRepository       brandRepository;
+    private final SubcategoryRepository subcategoryRepository;
+    private final ProductMapper         productMapper;
 
     @Override
     @Transactional
-    public ProductDetailResponseDTO createProduct(ProductRequestDTO productRequestDTO, CustomUserPrincipal principal) {
-        productRequestDTO.setName(productRequestDTO.getName().trim().toLowerCase());
-        Optional<Product> existing = productRepository.findByName(productRequestDTO.getName());
+    public ProductDetailResponseDTO createProduct(ProductRequestDTO dto, CustomUserPrincipal principal) {
+        String name = dto.getName().trim();
+        dto.setName(name);
 
-        Product product;
-        if (existing.isPresent() && existing.get().getIsDeleted()) {
-            product = existing.get();
-            product.setIsDeleted(false);
-            product.setDeleteAt(null);
-            productMapper.updateEntityFromDTO(productRequestDTO, product);
-        } else if (existing.isPresent()) {
-            throw new DuplicateResourceException("Product with name '" + productRequestDTO.getName() + "' already exists");
-        } else {
-            product = productMapper.toEntity(productRequestDTO);
-        }
+        productRepository.findByName(name.toLowerCase()).ifPresent(existing -> {
+            if (!existing.getIsDeleted()) {
+                throw new DuplicateResourceException("Product with name '" + name + "' already exists");
+            }
+        });
+
+        Brand brand = brandRepository.findById(dto.getBrandId())
+                .orElseThrow(() -> new NotFoundException("Brand with ID " + dto.getBrandId() + " not found"));
+
+        Product product = productMapper.toEntity(dto);
+        product.setBrand(brand);
+
+        resolveAndSetSubcategories(product, dto.getSubcategoryIds());
 
         Product saved = productRepository.save(product);
-        log.info("Product created: {} by admin: {}", productRequestDTO.getName(), principal.getId());
+        log.info("Product created: '{}' by user: {}", saved.getName(), principal.getId());
         return productMapper.toDetailResponseDTO(saved);
     }
 
@@ -69,43 +72,24 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Page<ProductListResponseDTO> searchAllProducts(String search, Boolean isVisual, int page, int size, String sortBy) {
-        log.debug("Executing product search");
+    public Page<ProductListResponseDTO> searchAllProducts(String search, Boolean active, int page, int size, String sortBy) {
+        log.debug("Executing product search — search={}, active={}", search, active);
 
-        String valAsc = "Asc";
-        String valDesc = "Desc";
-        String sortField = "";
-        String sortDirection = "";
-
-        if (sortBy != null) {
-            if (sortBy.contains(valAsc)) {
-                sortField = sortBy.replace(valAsc, "");
-                sortDirection = valAsc;
-            }
-            if (sortBy.contains(valDesc)) {
-                sortField = sortBy.replace(valDesc, "");
-                sortDirection = valDesc;
-            }
-        }
-        if (sortField.isEmpty()) {
-            sortField = "id";
-        }
-        Sort sort = sortDirection.equalsIgnoreCase(valDesc) ? Sort.by(sortField).descending()
-                : Sort.by(sortField).ascending();
-
+        Sort sort = buildSort(sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Specification<Product> spec = (root, query, cb) -> {
             query.distinct(true);
             List<Predicate> predicates = new ArrayList<>();
-            // Buscar por nombre
-            if (search != null && !search.isEmpty()) {
-                predicates.add(
-                        cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
+
+            if (search != null && !search.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
             }
-            if (isVisual != null) {
-                predicates.add(
-                        cb.equal(root.get("isVisual"), isVisual));
+            if (active != null) {
+                predicates.add(cb.equal(root.get("state"), active));
+                if (active) {
+                    predicates.add(cb.equal(root.get("isDeleted"), false));
+                }
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
@@ -115,15 +99,22 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    public ProductDetailResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO, CustomUserPrincipal principal) {
-        productRequestDTO.setName(productRequestDTO.getName().trim().toLowerCase());
+    public ProductDetailResponseDTO updateProduct(Long id, ProductRequestDTO dto, CustomUserPrincipal principal) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product with ID " + id + " not found"));
 
-        productMapper.updateEntityFromDTO(productRequestDTO, product);
+        Brand brand = brandRepository.findById(dto.getBrandId())
+                .orElseThrow(() -> new NotFoundException("Brand with ID " + dto.getBrandId() + " not found"));
+
+        productMapper.updateEntityFromDTO(dto, product);
+        product.setBrand(brand);
+
+        // Reemplazar subcategorías completamente
+        product.getSubcategories().clear();
+        resolveAndSetSubcategories(product, dto.getSubcategoryIds());
 
         Product saved = productRepository.save(product);
-        log.info("Product updated: {} by admin: {}", product.getName(), principal.getId());
+        log.info("Product updated: '{}' by user: {}", saved.getName(), principal.getId());
         return productMapper.toDetailResponseDTO(saved);
     }
 
@@ -133,10 +124,34 @@ public class ProductServiceImpl implements IProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product with ID " + id + " not found"));
 
-        product.setIsDeleted(true);
-        product.setDeleteAt(LocalDate.now().atStartOfDay());
+        product.softDelete(principal.getId());
         productRepository.save(product);
-        log.info("Product soft deleted: {} by admin: {}", product.getName(), principal.getId());
+        log.info("Product soft deleted: '{}' by user: {}", product.getName(), principal.getId());
     }
 
+    // ─── helpers ────────────────────────────────────────────────────────────
+
+    private void resolveAndSetSubcategories(Product product, List<Long> subcategoryIds) {
+        if (subcategoryIds == null || subcategoryIds.isEmpty()) return;
+
+        List<Subcategory> subcategories = subcategoryRepository.findAllById(subcategoryIds);
+        if (subcategories.size() != subcategoryIds.size()) {
+            List<Long> found = subcategories.stream().map(Subcategory::getId).toList();
+            List<Long> missing = subcategoryIds.stream().filter(sid -> !found.contains(sid)).toList();
+            throw new NotFoundException("Subcategories not found: " + missing);
+        }
+        subcategories.forEach(product::addSubcategory);
+    }
+
+    private Sort buildSort(String sortBy) {
+        if (sortBy == null || sortBy.isBlank()) return Sort.by("id").ascending();
+        return switch (sortBy.toLowerCase()) {
+            case "name_asc"   -> Sort.by("name").ascending();
+            case "name_desc"  -> Sort.by("name").descending();
+            case "score_asc"  -> Sort.by("score").ascending();
+            case "score_desc" -> Sort.by("score").descending();
+            case "id_desc"    -> Sort.by("id").descending();
+            default           -> Sort.by("id").ascending();
+        };
+    }
 }

@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -26,4 +27,6 @@ public class ProductRequestDTO {
     @NotNull(message = "Brand ID cannot be null")
     private Long brandId;
 
+    @Builder.Default
+    private List<Long> subcategoryIds = new ArrayList<>();
 }
