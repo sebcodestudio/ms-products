@@ -26,7 +26,7 @@ Backend de gestión de productos para una plataforma e-commerce multi-tenant, co
 | Variable | Descripción | Requerida |
 |---|---|---|
 | `JWT_SECRET` | Clave secreta JWT (mínimo 64 caracteres) | ✅ |
-| `DB_URL` | URL de conexión PostgreSQL. Ej: `jdbc:postgresql://localhost:5432/msproducts` | ✅ |
+| `DB_URL` | URL de conexión PostgreSQL. Ej: `jdbc:postgresql://postgres-db:5432/ms_products_db` | ✅ |
 | `DB_USER` | Usuario de la base de datos | ✅ |
 | `DB_PASSWORD` | Contraseña de la base de datos | ✅ |
 | `REDIS_HOST` | Host de Redis (prod/qa) | ✅ prod/qa |
@@ -41,7 +41,7 @@ Backend de gestión de productos para una plataforma e-commerce multi-tenant, co
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/sebcode/ms-products.git
+git clone https://github.com/sebcodestudio/ms-products.git
 cd ms-products
 ```
 
@@ -49,9 +49,10 @@ cd ms-products
 
 ```bash
 export JWT_SECRET=mi_clave_super_secreta_de_al_menos_64_caracteres_para_firmar_tokens
-export DB_URL=jdbc:postgresql://localhost:5432/msproducts
+export DB_URL=jdbc:postgresql://postgres-db:5432/ms_products_db
 export DB_USER=postgres
 export DB_PASSWORD=postgres
+export SPRING_PROFILES_ACTIVE=dev
 ```
 
 ### 3. Ejecutar
@@ -74,10 +75,11 @@ docker build -t ms-products .
 
 ```bash
 docker run -p 8080:8080 \
-  -e JWT_SECRET=tu_clave_secreta \
-  -e DB_URL=jdbc:postgresql://host.docker.internal:5432/msproducts \
+  -e JWT_SECRET=mi_clave_super_secreta_de_al_menos_64_caracteres_para_firmar_tokens \
+  -e DB_URL=jdbc:postgresql://postgres-db:5432/ms_products_db \
   -e DB_USER=postgres \
   -e DB_PASSWORD=postgres \
+  -e SPRING_PROFILES_ACTIVE=dev \
   ms-products
 ```
 

@@ -1,32 +1,28 @@
-# application-prod.yml
 spring:
   jpa:
     hibernate:
-      ddl-auto: validate        # en prod nunca update, solo validar
-    show-sql: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
     defer-datasource-initialization: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
-      mode: never
-  cache:
-    type: redis
-    redis:
-      time-to-live: 600000
-      cache-null-values: false
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 2
+      mode: always
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
+server:
+  address: 0.0.0.0
+  port: ${SERVER_PORT}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    out-of-order: false

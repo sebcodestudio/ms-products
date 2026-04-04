@@ -19,7 +19,7 @@ public class CompanyResponseDTO {
     private ContributorType contributorType; // ✅ Agregado
     private String fiscalAddress;
     private TaxRegime taxRegime; // ✅ Agregado
-    private Boolean active; // ✅ Agregado
+    private Boolean state; // ✅ Agregado
     private LocalDateTime createdAt; // ✅ Opcional pero útil
 
     @JsonIgnore

@@ -29,7 +29,7 @@ public abstract class AuditableEntity {
     @Column(name = "is_deleted", nullable = false)
     protected Boolean isDeleted;
 
-    @Column(name = "delete_date")
+    @Column(name = "delete_at")
     protected LocalDateTime deleteAt;
 
     @CreatedBy
