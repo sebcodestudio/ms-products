@@ -27,3 +27,17 @@ jwt:
 server:
   address: 0.0.0.0
   port: ${SERVER_PORT:8080}
+management:
+  health:
+    # spring-boot-starter-data-redis está en el classpath (usado en qa/dev),
+    # así que su health indicator se auto-configura igual aunque este perfil
+    # use cache.type=simple y no tenga Redis corriendo — sin esto, /actuator/health
+    # queda en DOWN aunque la app funcione bien.
+    redis:
+      enabled: false
+    # El email de notificación del Libro de Reclamaciones es best-effort (si
+    # falla, el reclamo igual se guarda — ver ComplaintNotificationService).
+    # No tiene sentido que tumbe el health general si MAIL_* no está
+    # configurado todavía o el SMTP falla puntualmente.
+    mail:
+      enabled: false
