@@ -285,7 +285,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // Brand SEB-WOLF
         Brand brand = brandRepository.save(
-                Brand.builder().name("SEB-WOLF").state(true).isDeleted(false)
+                Brand.builder().name("COMEX").state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build()
         );
 
