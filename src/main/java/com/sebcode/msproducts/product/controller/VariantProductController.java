@@ -85,7 +85,7 @@ public class VariantProductController {
     @GetMapping("/admin/search")
     @Operation(summary = "Search variant products", description = "Search and filter variant products with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Search completed successfully")
-    public ResponseEntity<PageResponse<VariantProductListAdminResponseDTO>> searchAdmin(
+    public ResponseEntity<PageResponse<VariantProductDetailAdminResponseDTO>> searchAdmin(
             @Parameter(description = "Search term for variant product name or description")
             @RequestParam(required = false) String search,
 
@@ -130,8 +130,9 @@ public class VariantProductController {
 
         log.info("Searching variant products admin - page: {}, size: {}, sortBy: {}", page, size, sortBy);
 
-        Page<VariantProductListAdminResponseDTO> variantProducts = variantProductService.searchAllVariantProductsAdmin(
+        Page<VariantProductDetailAdminResponseDTO> variantProducts = variantProductService.searchAllVariantProductsAdmin(
                 category, subcategory, brand, score, search, minPrice, maxPrice, page, size, sortBy);
+
 
         log.info("Search completed. Found {} variant products admin", variantProducts.getTotalElements());
         return ResponseEntity.ok(PageResponse.of(variantProducts));

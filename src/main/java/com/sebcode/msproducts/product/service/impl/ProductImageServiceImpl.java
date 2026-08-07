@@ -9,7 +9,7 @@ import com.sebcode.msproducts.product.entity.ProductImage;
 import com.sebcode.msproducts.product.mapper.ProductImageMapper;
 import com.sebcode.msproducts.product.repository.AttributeValueRepository;
 import com.sebcode.msproducts.product.repository.ProductImageRepository;
-import com.sebcode.msproducts.product.repository.VariantProductRepository;
+import com.sebcode.msproducts.product.repository.ProductRepository;
 import com.sebcode.msproducts.product.service.IProductImageService;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
 import jakarta.persistence.criteria.Predicate;
@@ -35,23 +35,25 @@ import java.util.Optional;
 public class ProductImageServiceImpl implements IProductImageService {
 
     private final ProductImageRepository productImageRepository;
-    private final VariantProductRepository variantProductRepository;
+    private final ProductRepository productRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final ProductImageMapper productImageMapper;
 
     @Override
     @Transactional
     public ProductImageDetailResponseDTO createProductImage(ProductImageRequestDTO productImageRequestDTO, CustomUserPrincipal principal) {
-//        productImageRequestDTO.setValue(productImageRequestDTO.getImageUrl().trim().toLowerCase());
-//        Optional<ProductImage> existing = productImageRepository.findByValue(productImageRequestDTO.getImageUrl());
+        productRepository.findById(productImageRequestDTO.getProductId())
+                .orElseThrow(() -> new NotFoundException("Product with id '" + productImageRequestDTO.getProductId() + "' don't exists"));
+        if (productImageRequestDTO.getAttributeValueId() != null) {
+            attributeValueRepository.findById(productImageRequestDTO.getAttributeValueId())
+                    .orElseThrow(() -> new NotFoundException("Attribute value with id '" + productImageRequestDTO.getAttributeValueId() + "' don't exists"));
+        }
 
-        variantProductRepository.findById(productImageRequestDTO.getVariantProductId())
-                .orElseThrow(() -> new NotFoundException("Product image with id '" + productImageRequestDTO.getVariantProductId() + "' don't exists"));
-        attributeValueRepository.findById(productImageRequestDTO.getAttributeValueId())
-                .orElseThrow(() -> new NotFoundException("Product image with id '" + productImageRequestDTO.getVariantProductId() + "' don't exists"));
-
-        Optional<ProductImage> existing = productImageRepository
-                .findByImageUrlAndVariantProductIdAndAttributeValueId(productImageRequestDTO.getImageUrl(), productImageRequestDTO.getVariantProductId(), productImageRequestDTO.getAttributeValueId());
+        Optional<ProductImage> existing = productImageRequestDTO.getAttributeValueId() != null
+                ? productImageRepository.findByImageUrlAndProductIdAndAttributeValueId(
+                        productImageRequestDTO.getImageUrl(), productImageRequestDTO.getProductId(), productImageRequestDTO.getAttributeValueId())
+                : productImageRepository.findByImageUrlAndProductIdAndAttributeValueIsNull(
+                        productImageRequestDTO.getImageUrl(), productImageRequestDTO.getProductId());
 
         ProductImage productImage;
         if (existing.isPresent() && existing.get().getIsDeleted()) {
@@ -123,11 +125,12 @@ public class ProductImageServiceImpl implements IProductImageService {
     @Override
     @Transactional
     public ProductImageDetailResponseDTO updateProductImage(Long id, ProductImageRequestDTO productImageRequestDTO, CustomUserPrincipal principal) {
-//        productImageRequestDTO.setImageUrl(productImageRequestDTO.getImageUrl().trim().toLowerCase());
-        variantProductRepository.findById(productImageRequestDTO.getVariantProductId())
-                .orElseThrow(() -> new NotFoundException("Product image with id '" + productImageRequestDTO.getVariantProductId() + "' don't exists"));
-        attributeValueRepository.findById(productImageRequestDTO.getAttributeValueId())
-                .orElseThrow(() -> new NotFoundException("Product image with id '" + productImageRequestDTO.getVariantProductId() + "' don't exists"));
+        productRepository.findById(productImageRequestDTO.getProductId())
+                .orElseThrow(() -> new NotFoundException("Product with id '" + productImageRequestDTO.getProductId() + "' don't exists"));
+        if (productImageRequestDTO.getAttributeValueId() != null) {
+            attributeValueRepository.findById(productImageRequestDTO.getAttributeValueId())
+                    .orElseThrow(() -> new NotFoundException("Attribute value with id '" + productImageRequestDTO.getAttributeValueId() + "' don't exists"));
+        }
 
         ProductImage productImage = productImageRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product image with ID " + id + " not found"));

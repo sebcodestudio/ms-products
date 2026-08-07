@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductImageListResponseDTO {
     private Long id;
-    //    private Long variantProductId;
-    private Long variantProductSku;
+    private Long productId;
+    private String productName;
     private String attributeValueName;
     private String imageUrl;
     //    private Integer imageOrder;

@@ -124,11 +124,27 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- Flyway -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
         <!-- Rate Limiting -->
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
             <version>8.10.1</version>
+        </dependency>
+
+        <!-- Mail (Libro de Reclamaciones) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <!-- Redis Cache -->
@@ -147,11 +163,12 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>com.h2database</groupId>-->
-        <!--            <artifactId>h2</artifactId>-->
-        <!--            <scope>test</scope>-->
-        <!--        </dependency>-->
+        <!-- Test — H2 in-memory DB -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -164,7 +181,7 @@
                     <source>21</source>
                     <target>21</target>
                     <compilerArgs>
-                        <arg>-Amapstruct.verbose=true</arg>  <!-- ← agregar -->
+                        <arg>-Amapstruct.verbose=true</arg>
                     </compilerArgs>
                     <annotationProcessorPaths>
                         <!-- 1. Lombok -->

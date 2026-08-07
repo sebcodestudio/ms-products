@@ -18,10 +18,10 @@ public interface SubcategoryRepository extends JpaRepository<Subcategory, Long>,
     @Query("""
             SELECT s FROM Subcategory s
             JOIN s.category c
-            WHERE c.isDeleted = false AND s.state = true AND s.isDeleted = false AND s.id = :subcategoryId
+            WHERE c.isDeleted = false AND s.state = true AND s.isDeleted = false AND c.id = :categoryId
             ORDER BY s.displayOrder DESC
             """)
-    List<Subcategory> findAllList(Long subcategoryId, Pageable pageable);
+    List<Subcategory> findAllList(Long categoryId, Pageable pageable);
 
     Optional<Subcategory> findByName(String name);
 

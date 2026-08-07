@@ -15,7 +15,7 @@ public interface ProductImageMapper {
 
     @Mapping(target = "id", ignore = true)
 //    @Mapping(target = "attributeType", source = "attributeTypeId", qualifiedByName = "mapAttributeType")
-    @Mapping(target = "variantProduct", ignore = true)
+    @Mapping(target = "product", ignore = true)
     @Mapping(target = "attributeValue", ignore = true)
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
@@ -28,16 +28,17 @@ public interface ProductImageMapper {
 
     @Mapping(target = "attributeValueId", source = "attributeValue.id")
     @Mapping(target = "attributeValueName", source = "attributeValue.value")
-    @Mapping(target = "variantProductId", source = "variantProduct.id")
-    @Mapping(target = "variantProductSku", source = "variantProduct.sku")
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "productName", source = "product.name")
     ProductImageDetailResponseDTO toDetailResponseDTO(ProductImage productImage);
 
     @Mapping(target = "attributeValueName", source = "attributeValue.value")
-    @Mapping(target = "variantProductSku", source = "variantProduct.sku")
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "productName", source = "product.name")
     ProductImageListResponseDTO toListResponseDTO(ProductImage productImage);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "variantProduct", ignore = true)
+    @Mapping(target = "product", ignore = true)
     @Mapping(target = "attributeValue", ignore = true)
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)

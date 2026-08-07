@@ -2,31 +2,54 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect # org.hibernate.dialect.MySQLDialect
-    defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        boot.allow_jdbc_metadata_access: true
+        jdbc.lob.non_contextual_creation: true
+        temp.use_jdbc_metadata_defaults: false
+        javax.persistence.schema-generation.database.action: none
+        initializer_order: 1
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver # driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
   sql:
     init:
-      mode: never # separator: "$$"
+      mode: never
+      separator: "$$"
   cache:
     type: redis
     redis:
-      time-to-live: 600000 # 10 minutos por defecto
+      time-to-live: 600000
       cache-null-values: false
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 2
+
+    data:
+      redis:
+        host: localhost
+        port: 6379
+        password: ${REDIS_PASSWORD:}
+        timeout: 2000ms
+        lettuce:
+          pool:
+            max-active: 8
+            max-idle: 8
+            min-idle: 2
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    schemas: public
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    check-location: true
+    out-of-order: true
+  main:
+    allow-circular-references: true
+  logging:
+    level:
+      org.flywaydb: DEBUG
+      org.springframework.boot.autoconfigure.flyway: DEBUG

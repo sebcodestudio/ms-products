@@ -15,10 +15,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductImageRequestDTO {
 
-    @NotNull(message = "Variant product ID cannot be null")
-    private Long variantProductId;
+    @NotNull(message = "Product ID cannot be null")
+    private Long productId;
 
-    @NotNull(message = "Attribute value ID cannot be null")
     private Long attributeValueId;
 
     @NotBlank(message = "Image URL cannot be blank")

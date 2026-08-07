@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@JsonPropertyOrder({"id", "variantProductId", "variantProductName", "attributeValueId", "attributeValueName", "imageUrl", "imageOrder", "isMain", "altText", "imageType"})
+@JsonPropertyOrder({"id", "productId", "productName", "attributeValueId", "attributeValueName", "imageUrl", "imageOrder", "isMain", "altText", "imageType"})
 public class ProductImageDetailResponseDTO extends AuditableEntityResponseDTO {
     private Long id;
-    private Long variantProductId;
-    private String variantProductSku;
+    private Long productId;
+    private String productName;
     private Long attributeValueId;
     private String attributeValueName;
     private String imageUrl;

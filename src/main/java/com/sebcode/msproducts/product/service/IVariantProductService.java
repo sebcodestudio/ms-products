@@ -2,7 +2,6 @@ package com.sebcode.msproducts.product.service;
 
 import com.sebcode.msproducts.product.dto.request.VariantProductRequestDTO;
 import com.sebcode.msproducts.product.dto.response.admin.VariantProductDetailAdminResponseDTO;
-import com.sebcode.msproducts.product.dto.response.admin.VariantProductListAdminResponseDTO;
 import com.sebcode.msproducts.product.dto.response.customer.VariantProductDetailPublicResponseDTO;
 import com.sebcode.msproducts.product.dto.response.customer.VariantProductListPublicResponseDTO;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
@@ -17,8 +16,8 @@ public interface IVariantProductService {
 
     Optional<VariantProductDetailAdminResponseDTO> getVariantProductsByIdAdmin(Long id);
 
-    Page<VariantProductListAdminResponseDTO> searchAllVariantProductsAdmin(String category, String subcategory, String brand, Double score,
-                                                                           String search, Double minPrice, Double maxPrice, int page, int size, String sortBy);
+    Page<VariantProductDetailAdminResponseDTO> searchAllVariantProductsAdmin(String category, String subcategory, String brand, Double score,
+                                                                             String search, Double minPrice, Double maxPrice, int page, int size, String sortBy);
 
     Optional<VariantProductDetailPublicResponseDTO> getVariantProductsByIdPublic(Long id);
 

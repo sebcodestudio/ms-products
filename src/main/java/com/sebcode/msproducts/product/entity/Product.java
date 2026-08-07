@@ -2,6 +2,7 @@ package com.sebcode.msproducts.product.entity;
 
 import com.sebcode.msproducts.category.entity.Subcategory;
 import com.sebcode.msproducts.common.entity.AuditableEntity;
+import com.sebcode.msproducts.product.enums.ImageType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -65,6 +67,14 @@ public class Product extends AuditableEntity {
     @Builder.Default
     private List<VariantProduct> variantProducts = new ArrayList<>();
 
+    // Imágenes del producto. Sin attributeValue = genérica (usada en catálogo);
+    // con attributeValue (ej. Color=Rojo) = solo aplica a variantes con ese atributo.
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("imageOrder ASC")
+    @BatchSize(size = 10)
+    @Builder.Default
+    private List<ProductImage> images = new ArrayList<>();
+
     // ============================================
     // LIFECYCLE CALLBACKS
     // ============================================
@@ -75,6 +85,7 @@ public class Product extends AuditableEntity {
         if (this.score == null) this.score = BigDecimal.ZERO;
         if (this.variantProducts == null) this.variantProducts = new ArrayList<>();
         if (this.subcategories == null) this.subcategories = new ArrayList<>();
+        if (this.images == null) this.images = new ArrayList<>();
     }
 
     // ============================================
@@ -124,6 +135,34 @@ public class Product extends AuditableEntity {
     public void addVariant(VariantProduct variant) {
         variantProducts.add(variant);
         variant.setProduct(this);
+    }
+
+    public void addImage(String url, boolean isMain, ImageType type, AttributeValue attributeValue) {
+        ProductImage img = ProductImage.builder()
+                .product(this)
+                .imageUrl(url)
+                .isMain(isMain)
+                .imageType(type)
+                .attributeValue(attributeValue)
+                .imageOrder(images.size())
+                .build();
+        images.add(img);
+    }
+
+    /**
+     * Imagen "general" del producto, usada en catálogo/listados donde no se
+     * quiere que la foto cambie según el color de la variante mostrada.
+     */
+    public String getMainImageUrl() {
+        if (images == null || images.isEmpty()) return null;
+        return images.stream()
+                .filter(img -> Boolean.TRUE.equals(img.getIsMain()))
+                .findFirst()
+                .map(ProductImage::getImageUrl)
+                .orElse(images.stream()
+                        .min(Comparator.comparingInt(img -> img.getImageOrder() != null ? img.getImageOrder() : 0))
+                        .map(ProductImage::getImageUrl)
+                        .orElse(null));
     }
 
     public void addSubcategory(Subcategory subcategory) {

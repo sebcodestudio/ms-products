@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VariantAttributeResponseDTO {
     private Long id;
-    private String attributeName; // "Color"
-    private String attributeValue; // "Rojo"
+    private String attributeName;    // "Color"
+    private String attributeValue;   // "Rojo"
     private Long attributeTypeId;
     private Long attributeValueId;
     private Boolean isVisual;

@@ -19,8 +19,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product_images", indexes = {
-        @Index(name = "idx_img_variant", columnList = "id_variant_product"),
-        @Index(name = "idx_img_main", columnList = "id_variant_product, is_main"),
+        @Index(name = "idx_img_product", columnList = "id_product"),
+        @Index(name = "idx_img_product_main", columnList = "id_product, is_main"),
         @Index(name = "idx_img_visual_attr", columnList = "id_visual_attribute_value")
 })
 public class ProductImage extends AuditableEntity {
@@ -51,12 +51,13 @@ public class ProductImage extends AuditableEntity {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_variant_product", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_img_variant"))
-    private VariantProduct variantProduct;
+    @JoinColumn(name = "id_product", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_img_product"))
+    private Product product;
 
-    // OPCIONAL: Vincular imagen con el atributo visual específico
-    // Útil para compartir imágenes entre variantes del mismo color
+    // Vincula la imagen a un valor de atributo visual específico (ej. Color=Rojo).
+    // null = imagen genérica del producto, aplica a todas las variantes.
+    // con valor = solo aplica a variantes que tengan ese atributo (ej. todas las tallas en Rojo).
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_visual_attribute_value",
             foreignKey = @ForeignKey(name = "fk_img_visual_attr"))
@@ -84,10 +85,10 @@ public class ProductImage extends AuditableEntity {
     }
 
     public void validateMainImage() {
-        if (Boolean.TRUE.equals(isMain) && variantProduct != null) {
+        if (Boolean.TRUE.equals(isMain) && product != null) {
             // Solo validar si la colección ya está cargada
-            if (Hibernate.isInitialized(variantProduct.getProductImages())) {
-                variantProduct.getProductImages().stream()
+            if (Hibernate.isInitialized(product.getImages())) {
+                product.getImages().stream()
                         .filter(img -> !img.equals(this) && Boolean.TRUE.equals(img.getIsMain()))
                         .forEach(img -> img.setIsMain(false));
             }

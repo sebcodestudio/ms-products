@@ -30,8 +30,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final int PUBLIC_LIMIT = 100;
     private static final Duration PUBLIC_WINDOW = Duration.ofMinutes(1);
 
+    // Limite para registrar reclamos/quejas: 5 por minuto por IP (evita spam/abuso del envio de emails)
+    private static final int COMPLAINTS_LIMIT = 5;
+    private static final Duration COMPLAINTS_WINDOW = Duration.ofMinutes(1);
+
     private final Map<String, Bucket> loginBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> publicBuckets = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> complaintsBuckets = new ConcurrentHashMap<>();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -53,6 +58,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
             if (!bucket.tryConsume(1)) {
                 log.warn("Rate limit exceeded for public endpoint from IP: {}", ip);
                 writeRateLimitResponse(response, "Demasiadas solicitudes. Intenta en 1 minuto.");
+                return;
+            }
+        } else if (path.startsWith("/api/v1/complaints") && "POST".equalsIgnoreCase(request.getMethod())) {
+            Bucket bucket = complaintsBuckets.computeIfAbsent(ip, k -> buildBucket(COMPLAINTS_LIMIT, COMPLAINTS_WINDOW));
+            if (!bucket.tryConsume(1)) {
+                log.warn("Rate limit exceeded for complaints endpoint from IP: {}", ip);
+                writeRateLimitResponse(response, "Demasiados reclamos enviados. Intenta en 1 minuto.");
                 return;
             }
         }

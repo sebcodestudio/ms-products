@@ -1,0 +1,81 @@
+services:
+  # 1. Base de Datos
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ms_products_db
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ms_products_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Almacenamiento de imágenes (simula S3 en local)
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # API (tu backend se conecta aquí)
+      - "9001:9001"   # Consola web visual
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. Backend (Spring Boot)
+  ms-products:
+    build: .
+    container_name: ms-products
+    environment:
+      - TZ=America/Lima
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/ms_products_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      # MinIO (S3-compatible)
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_USER}
+      - MINIO_SECRET_KEY=${MINIO_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      # Email — Libro de Reclamaciones
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - COMPLAINT_NOTIFICATION_EMAIL=${COMPLAINT_NOTIFICATION_EMAIL}
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      # Host 8084 -> el 8080/8081/8082/8083 ya los usan otros proyectos locales (banco).
+      # Dentro de la red Docker sigue siendo 8080 (así lo consume seb-wolf-web).
+      - "8084:8080"
+    networks:
+      - app-network
+
+volumes:
+  minio_data:
+
+networks:
+  # Nombre fijo (no el default con prefijo de proyecto) para que
+  # seb-wolf-web/docker-compose.yml pueda unirse a esta red como "external".
+  app-network:
+    name: seb-wolf-network
+    driver: bridge

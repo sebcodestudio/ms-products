@@ -13,9 +13,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -99,11 +102,6 @@ public class VariantProduct extends AuditableEntity {
     @OneToMany(mappedBy = "variantProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<VariantAttribute> variantAttributes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "variantProduct", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("imageOrder ASC")
-    @Builder.Default
-    private List<ProductImage> productImages = new ArrayList<>();
 
     // ============================================
     // LIFECYCLE CALLBACKS
@@ -393,16 +391,55 @@ public class VariantProduct extends AuditableEntity {
     }
 
     /**
-     * Obtiene imagen principal
+     * Imágenes de esta variante, resueltas desde las imágenes del producto padre.
+     * Prioriza las imágenes ligadas a los valores de atributo visual de esta variante
+     * (ej. Color=Rojo comparte foto entre todas las tallas de Rojo). Si la variante no
+     * tiene atributos visuales o no hay imágenes para ese valor, cae a las imágenes
+     * genéricas del producto (sin attributeValue).
      */
-//    @Transient
-//    public String getMainImageUrl() {
-//        return images.stream()
-//                .filter(img -> Boolean.TRUE.equals(img.getIsMain()))
-//                .findFirst()
-//                .map(ProductImage::getImageUrl)
-//                .orElse(product != null ? product.getDefaultImageUrl() : null);
-//    }
+    @Transient
+    public List<ProductImage> getResolvedImages() {
+        if (product == null || product.getImages() == null || product.getImages().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Comparator<ProductImage> byOrder = Comparator.comparingInt(
+                img -> img.getImageOrder() != null ? img.getImageOrder() : 0);
+
+        Set<Long> myVisualValueIds = variantAttributes.stream()
+                .filter(VariantAttribute::isVisualAttribute)
+                .map(va -> va.getAttributeValue() != null ? va.getAttributeValue().getId() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        if (!myVisualValueIds.isEmpty()) {
+            List<ProductImage> matched = product.getImages().stream()
+                    .filter(img -> img.getAttributeValue() != null
+                            && myVisualValueIds.contains(img.getAttributeValue().getId()))
+                    .sorted(byOrder)
+                    .collect(Collectors.toList());
+            if (!matched.isEmpty()) return matched;
+        }
+
+        List<ProductImage> generic = product.getImages().stream()
+                .filter(img -> img.getAttributeValue() == null)
+                .sorted(byOrder)
+                .collect(Collectors.toList());
+        if (!generic.isEmpty()) return generic;
+
+        return product.getImages().stream().sorted(byOrder).collect(Collectors.toList());
+    }
+
+    @Transient
+    public String getResolvedMainImageUrl() {
+        List<ProductImage> resolved = getResolvedImages();
+        if (resolved.isEmpty()) return null;
+        return resolved.stream()
+                .filter(img -> Boolean.TRUE.equals(img.getIsMain()))
+                .findFirst()
+                .map(ProductImage::getImageUrl)
+                .orElse(resolved.get(0).getImageUrl());
+    }
     @AssertTrue(message = "Discount end date must be after start date")
     private boolean isValidDiscountPeriod() {
         if (discountStartDate == null || discountEndDate == null) {
@@ -422,21 +459,6 @@ public class VariantProduct extends AuditableEntity {
                 .build();
         variantAttributes.add(attr);
     }
-
-    /**
-     * Añade una imagen
-     */
-    public void addImage(String url, boolean isMain, ImageType type) {
-        ProductImage img = ProductImage.builder()
-                .variantProduct(this)
-                .imageUrl(url)
-                .isMain(isMain)
-                .imageType(type)
-                .imageOrder(productImages.size())
-                .build();
-        productImages.add(img);
-    }
-
 
     // ============================================
     // EQUALS & HASHCODE (importante para JPA)

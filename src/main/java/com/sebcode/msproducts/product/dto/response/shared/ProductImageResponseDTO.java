@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 public class ProductImageResponseDTO {
     private Long id;
     private String imageUrl;
+    private String altText;
     private Boolean isMain;
-    private ImageType imageType; // PRODUCT, VARIANT, LIFESTYLE, DETAIL
+    private ImageType imageType;
     private Integer imageOrder;
 }

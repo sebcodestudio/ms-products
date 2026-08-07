@@ -20,7 +20,10 @@ import com.sebcode.msproducts.user.enums.Gender;
 import com.sebcode.msproducts.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.flywaydb.core.Flyway;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +35,12 @@ import java.util.Set;
 
 @Slf4j
 @Component
+@Profile("dev")
+@DependsOn("flyway")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
+    private final Flyway flyway;
     private final RoleRepository           roleRepository;
     private final UserRepository           userRepository;
     private final CategoryRepository       categoryRepository;
@@ -91,8 +97,8 @@ public class DataInitializer implements CommandLineRunner {
         String hash = passwordEncoder.encode("admin123");
 
         User admin = User.builder()
-                .email("admin@sebcode.com").password(hash)
-                .name("Sebastián").lastName("Ortega")
+                .email("admin@gmail.com").password(hash)
+                .name("Sebastian").lastName("Ortega")
                 .phone("987654321").address("Av. Javier Prado 123, San Isidro, Lima")
                 .birthdate(LocalDate.of(1995, 3, 10))
                 .gender(Gender.MALE).state(true)
@@ -100,7 +106,7 @@ public class DataInitializer implements CommandLineRunner {
                 .build();
 
         User seller = User.builder()
-                .email("seller@sebcode.com").password(hash)
+                .email("seller@gmail.com").password(hash)
                 .name("Ana").lastName("Torres")
                 .phone("999888777").address("Jr. Las Flores 456, Miraflores, Lima")
                 .birthdate(LocalDate.of(1992, 7, 15))
@@ -129,32 +135,32 @@ public class DataInitializer implements CommandLineRunner {
 
         CompanyUser ownerAdmin = CompanyUser.builder()
                 .user(admin).role(CompanyRole.OWNER)
-                .active(true).isDeleted(false)
+                .state(true).isDeleted(false)
                 .build();
 
         CompanyUser employeeSeller = CompanyUser.builder()
                 .user(seller).role(CompanyRole.MANAGER)
-                .active(true).isDeleted(false)
+                .state(true).isDeleted(false)
                 .build();
 
-        Company sebWolf = Company.builder()
-                .legalName("SEB-WOLF S.A.C.")
-                .tradeName("SEB-WOLF")
+        Company exampleCompany = Company.builder()
+                .legalName("COMEX S.A.C.")
+                .tradeName("COMEX")
                 .ruc("20601234567")
                 .taxRegime(TaxRegime.GENERAL)
                 .contributorType(ContributorType.LEGAL_ENTITY)
                 .fiscalAddress("Av. La Marina 1234, San Miguel, Lima")
 //                .phone("01-2345678")
-//                .email("contacto@seb-wolf.com")
-//                .website("https://seb-wolf.com")
-                .active(true).isDeleted(false)
+//                .email("contacto@gmail.com")
+//                .website("https://comex.com")
+                .state(true).isDeleted(false)
                 .companyUsers(List.of(ownerAdmin, employeeSeller))
                 .build();
 
-        ownerAdmin.setCompany(sebWolf);
-        employeeSeller.setCompany(sebWolf);
+        ownerAdmin.setCompany(exampleCompany);
+        employeeSeller.setCompany(exampleCompany);
 
-        return companyRepository.saveAll(List.of(sebWolf));
+        return companyRepository.saveAll(List.of(exampleCompany));
     }
 
     // =========================================================================
@@ -213,17 +219,17 @@ public class DataInitializer implements CommandLineRunner {
         return categoryRepository.saveAll(List.of(
                 Category.builder()
                         .name("Ropa").description("Prendas de vestir y accesorios")
-                        .imageUrl("https://cdn.seb-wolf.com/categories/ropa.webp")
+                        .imageUrl("http://localhost:9000/categories/ropa.webp")
                         .displayOrder(1).state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build(),
                 Category.builder()
                         .name("Calzado").description("Zapatillas, zapatos y sandalias")
-                        .imageUrl("https://cdn.seb-wolf.com/categories/calzado.webp")
+                        .imageUrl("http://localhost:9000/categories/calzado.webp")
                         .displayOrder(2).state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build(),
                 Category.builder()
                         .name("Suplementos").description("Proteínas, vitaminas y suplementos deportivos")
-                        .imageUrl("https://cdn.seb-wolf.com/categories/suplementos.webp")
+                        .imageUrl("http://localhost:9000/categories/suplementos.webp")
                         .displayOrder(3).state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build()
         ));
@@ -241,22 +247,22 @@ public class DataInitializer implements CommandLineRunner {
         return subcategoryRepository.saveAll(List.of(
                 Subcategory.builder()
                         .name("Polos").description("Polos básicos y estampados")
-                        .imageUrl("https://cdn.seb-wolf.com/subcategories/polos.webp")
+                        .imageUrl("http://localhost:9000/subcategories/polos.webp")
                         .displayOrder(1).category(ropa).state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build(),
                 Subcategory.builder()
                         .name("Hoodies").description("Hoodies y sudaderas")
-                        .imageUrl("https://cdn.seb-wolf.com/subcategories/hoodies.webp")
+                        .imageUrl("http://localhost:9000/subcategories/hoodies.webp")
                         .displayOrder(2).category(ropa).state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build(),
                 Subcategory.builder()
                         .name("Zapatillas").description("Zapatillas deportivas y casuales")
-                        .imageUrl("https://cdn.seb-wolf.com/subcategories/zapatillas.webp")
+                        .imageUrl("http://localhost:9000/subcategories/zapatillas.webp")
                         .displayOrder(1).category(calzado).state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build(),
                 Subcategory.builder()
                         .name("Proteínas").description("Whey protein y proteínas vegetales")
-                        .imageUrl("https://cdn.seb-wolf.com/subcategories/proteinas.webp")
+                        .imageUrl("http://localhost:9000/subcategories/proteinas.webp")
                         .displayOrder(1).category(suplementos).state(true).isDeleted(false)
                         .createdUser(uid).updateUser(uid).build()
         ));
@@ -327,8 +333,8 @@ public class DataInitializer implements CommandLineRunner {
                 String         colorName = colorNames[c];
 
                 // Imagen 600px y 1200px para esta combinación diseño+color
-                String img600  = String.format("https://cdn.seb-wolf.com/polos/polo-basico-%s-%s-600.webp",  design, colorName);
-                String img1200 = String.format("https://cdn.seb-wolf.com/polos/polo-basico-%s-%s-1200.webp", design, colorName);
+                String img600  = String.format("http://localhost:9000/polos/polo-basico-%s-%s-600.webp",  design, colorName);
+                String img1200 = String.format("http://localhost:9000/polos/polo-basico-%s-%s-1200.webp", design, colorName);
 
                 for (int t = 0; t < tallas.length; t++) {
                     AttributeValue tallaVal  = tallas[t];
@@ -366,15 +372,18 @@ public class DataInitializer implements CommandLineRunner {
                             .createdUser(uid).updateUser(uid)
                             .build());
 
-                    // Imágenes (solo para la primera talla de cada color, evitar duplicados)
+                    // Imágenes (solo para la primera talla de cada color, evitar duplicados).
+                    // Las imágenes cuelgan del Product y quedan ligadas al Color vía attributeValue,
+                    // así todas las tallas de ese color las comparten (ver VariantProduct.getResolvedImages).
+                    // Solo el primer color del producto queda como isMain=true (foto "general" del catálogo).
                     if (t == 0) {
                         productImageRepository.save(ProductImage.builder()
                                 .imageUrl(img600)
-                                .imageOrder(1).isMain(true)
+                                .imageOrder(1).isMain(c == 0)
                                 .altText("Polo " + designName + " " + colorName + " - 600px")
                                 .imageType(ImageType.MAIN)
                                 .attributeValue(colorVal)
-                                .variantProduct(variant)
+                                .product(product)
                                 .state(true).isDeleted(false)
                                 .createdUser(uid).updateUser(uid)
                                 .build());
@@ -385,7 +394,7 @@ public class DataInitializer implements CommandLineRunner {
                                 .altText("Polo " + designName + " " + colorName + " - 1200px")
                                 .imageType(ImageType.DETAIL)
                                 .attributeValue(colorVal)
-                                .variantProduct(variant)
+                                .product(product)
                                 .state(true).isDeleted(false)
                                 .createdUser(uid).updateUser(uid)
                                 .build());

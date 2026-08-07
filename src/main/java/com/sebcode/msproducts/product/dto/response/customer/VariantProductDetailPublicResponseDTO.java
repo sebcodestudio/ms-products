@@ -1,6 +1,7 @@
 package com.sebcode.msproducts.product.dto.response.customer;
 
 import com.sebcode.msproducts.product.dto.response.shared.ProductImageResponseDTO;
+import com.sebcode.msproducts.product.dto.response.shared.VariantAttributeResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,41 +40,44 @@ public class VariantProductDetailPublicResponseDTO {
     private Boolean available;
     private Integer soldCount;
 
-    // Atributos de esta variante específica
-//    private Map<String, String> attributes; // {"Color": "Rojo", "Talla": "M", "Almacenamiento": "128GB"}
-//
-//    // Todas las imágenes de esta variante
-//    private List<ProductImageResponseDTO> images;
-//
-//    // TODAS las variantes del producto (para cambiar entre variantes)
-//    private List<VariantOptionDTO> availableVariants;
-//
-//    // Atributos disponibles agrupados (para selectores)
-//    // {"Color": ["Rojo", "Azul", "Verde"], "Talla": ["S", "M", "L"]}
-//    private Map<String, List<AttributeOptionDTO>> availableAttributes;
-//
-//    @Data
-//    @Builder
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    public static class VariantOptionDTO {
-//        private Long variantId;
-//        private String sku;
-//        private Map<String, String> attributes;
-//        private BigDecimal price;
-//        private BigDecimal finalPrice;
-//        private Boolean inStock;
-//        private String mainImageUrl;
-//    }
-//
-//    @Data
-//    @Builder
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    public static class AttributeOptionDTO {
-//        private Long attributeValueId;
-//        private String value;
-//        private Boolean available; // Si hay stock en alguna variante con este valor
-//        private Boolean selected; // Si es el valor de la variante actual
-//    }
+    // Atributos de esta variante {"Color": "Rojo", "Talla": "M"}
+    private Map<String, String> attributes;
+
+    // Imágenes de esta variante
+    private List<ProductImageResponseDTO> images;
+
+    // Atributos con metadata (para el selector de variantes en el frontend)
+    private List<VariantAttributeResponseDTO> variantAttributes;
+
+    // TODAS las variantes del producto (para cambiar entre variantes)
+    private List<VariantOptionDTO> availableVariants;
+
+    // Atributos agrupados por tipo con disponibilidad (para los selectores)
+    // {"Color": [{"value":"Rojo","available":true,"selected":true}, ...], "Talla": [...]}
+    private Map<String, List<AttributeOptionDTO>> availableAttributes;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class VariantOptionDTO {
+        private Long variantId;
+        private String sku;
+        private Map<String, String> attributes;
+        private BigDecimal price;
+        private BigDecimal finalPrice;
+        private Boolean inStock;
+        private String mainImageUrl;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AttributeOptionDTO {
+        private Long attributeValueId;
+        private String value;
+        private Boolean available;
+        private Boolean selected;
+    }
 }

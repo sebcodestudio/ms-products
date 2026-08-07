@@ -77,8 +77,8 @@ public class CompanyServiceImpl implements ICompanyService {
         validateCanDelete(company);
 
         company.setIsDeleted(true);
-        company.setDeleteDate(LocalDate.now());
-        company.setActive(false);
+//        company.setDeleteAt(LocalDate.now());
+        company.setState(false);
         companyRepository.save(company);
 
         log.info("✅ Company soft deleted - ID: {}, RUC: {}", company.getId(), company.getRuc());
@@ -145,7 +145,7 @@ public class CompanyServiceImpl implements ICompanyService {
 
     private void validateCanDelete(Company company) {
         long activeUsers = company.getCompanyUsers().stream()
-                .filter(CompanyUser::getActive)
+                .filter(CompanyUser::getState)
                 .count();
 
         if (activeUsers > 0) {

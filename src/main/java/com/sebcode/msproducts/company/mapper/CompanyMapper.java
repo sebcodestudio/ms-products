@@ -12,9 +12,9 @@ public interface CompanyMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "contributorType", ignore = true)
-    @Mapping(target = "active", constant = "true")
+    @Mapping(target = "state", constant = "true")
     @Mapping(target = "isDeleted", constant = "false")
-    @Mapping(target = "deleteDate", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
     @Mapping(target = "companyUsers", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdUser", ignore = true)
@@ -26,9 +26,9 @@ public interface CompanyMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "contributorType", ignore = true)
-    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "state", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
-    @Mapping(target = "deleteDate", ignore = true)
+    @Mapping(target = "deleteAt", ignore = true)
     @Mapping(target = "companyUsers", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdUser", ignore = true)
