@@ -170,10 +170,29 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Storage — cliente S3, compatible con MinIO (local) y Cloudflare R2 (prod) -->
+        <!-- Storage — cliente S3, compatible con MinIO (local) y Cloudflare R2 (prod).
+             Excluye el cliente HTTP por defecto (Apache HttpClient, pesado) y usa
+             url-connection-client (JDK puro) — el free tier de Render ya tiene el
+             cold-start del JVM al límite del timeout de deploy, y esta librería
+             suma bastante classpath a escanear en el arranque. -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
+            <version>2.29.52</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>apache-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>netty-nio-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
             <version>2.29.52</version>
         </dependency>
 
