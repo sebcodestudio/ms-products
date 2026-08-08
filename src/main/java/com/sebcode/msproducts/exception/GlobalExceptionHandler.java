@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -82,6 +83,16 @@ public class GlobalExceptionHandler {
         ErrorResponse error = buildError(HttpStatus.CONFLICT, "DATA_INTEGRITY_ERROR",
                 "El recurso ya existe o tiene referencias que impiden la operacion", request);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    // 403 - @PreAuthorize rechazó la operación. Sin este handler explícito, este
+    // @ControllerAdvice intercepta la excepción antes de que llegue al
+    // ExceptionTranslationFilter de Spring Security y termina devolviendo 500.
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
+        ErrorResponse error = buildError(HttpStatus.FORBIDDEN, "ACCESO_DENEGADO",
+                "No tienes permisos suficientes para realizar esta operacion", request);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     // 409 - Locking optimista: otro usuario modificó el registro primero
