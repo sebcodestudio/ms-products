@@ -95,6 +95,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
+    // 502 - Fallo hablando con el storage (R2/MinIO)
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<ErrorResponse> handleStorage(StorageException ex, WebRequest request) {
+        log.error("Storage error: {}", ex.getMessage(), ex.getCause());
+        ErrorResponse error = buildError(HttpStatus.BAD_GATEWAY, ex.getCode(), ex.getMessage(), request);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
+
     // 409 - Locking optimista: otro usuario modificó el registro primero
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ErrorResponse> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex, WebRequest request) {

@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long>, JpaSpecificationExecutor<ProductImage> {
     Optional<ProductImage> findByImageUrlAndProductIdAndAttributeValueId(String value, Long productId, Long attributeValueId);
     Optional<ProductImage> findByImageUrlAndProductIdAndAttributeValueIsNull(String value, Long productId);
+    Optional<ProductImage> findByImageUrl(String imageUrl);
+    boolean existsByProductIdAndIsMainTrue(Long productId);
 }

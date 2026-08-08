@@ -2,6 +2,10 @@
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -33,6 +37,18 @@ app:
     from: ${MAIL_FROM:${MAIL_USERNAME:}}
   complaints:
     notification-email: ${COMPLAINT_NOTIFICATION_EMAIL:${MAIL_USERNAME:}}
+  storage:
+    # Mismas variables que ya pasa docker-compose.yml al servicio ms-products:
+    # en dev apuntan al MinIO local, en prod (Render) deben apuntar a Cloudflare
+    # R2 (endpoint S3 de la cuenta, no el dominio público pub-*.r2.dev).
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:}
+    secret-key: ${MINIO_SECRET_KEY:}
+    bucket: ${MINIO_BUCKET:product-images}
+    region: ${MINIO_REGION:auto}
+    # Dominio público desde el que se sirven las imágenes ya subidas (distinto
+    # del endpoint de la API S3). En R2 es el dominio pub-*.r2.dev del bucket.
+    public-base-url: ${STORAGE_PUBLIC_BASE_URL:http://localhost:9000/${MINIO_BUCKET:product-images}}
 
 management:
   endpoints:
