@@ -22,11 +22,19 @@ public class StorageConfig {
             @Value("${app.storage.secret-key}") String secretKey,
             @Value("${app.storage.region}") String region) {
 
+        // AwsBasicCredentials.create() lanza NullPointerException si el access
+        // key viene vacío — pasa en la construcción del bean, así que un
+        // MINIO_ACCESS_KEY sin configurar tumbaría el arranque (o, con
+        // lazy-init, la primera request que use el bean) en vez de fallar
+        // limpio recién cuando de verdad se intente subir un archivo.
+        String safeAccessKey = accessKey == null || accessKey.isBlank() ? "not-configured" : accessKey;
+        String safeSecretKey = secretKey == null || secretKey.isBlank() ? "not-configured" : secretKey;
+
         return S3Client.builder()
                 .endpointOverride(URI.create(endpoint))
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
+                        AwsBasicCredentials.create(safeAccessKey, safeSecretKey)))
                 // MinIO y R2 sirven en formato path-style (endpoint/bucket/key), no
                 // virtual-hosted-style (bucket.endpoint/key).
                 .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
