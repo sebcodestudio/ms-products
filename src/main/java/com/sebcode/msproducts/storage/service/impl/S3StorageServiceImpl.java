@@ -8,10 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.util.Map;
@@ -72,7 +72,10 @@ public class S3StorageServiceImpl implements StorageService {
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         } catch (IOException e) {
             throw new BadRequestException("No se pudo leer el archivo: " + e.getMessage());
-        } catch (S3Exception e) {
+        } catch (SdkException e) {
+            // Cubre tanto errores de conectividad (SdkClientException — no se
+            // pudo alcanzar el endpoint, ej. credenciales/endpoint mal
+            // configurados) como errores de respuesta del servicio S3/R2.
             log.error("Fallo subiendo '{}' al bucket '{}'", key, bucket, e);
             throw new StorageException("No se pudo subir la imagen al almacenamiento", e);
         }
