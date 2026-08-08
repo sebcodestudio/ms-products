@@ -71,14 +71,20 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/attribute-types/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/attribute-values/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/brands/**").hasRole("ADMIN")
+                        // Catálogo interno (marcas, tipos/valores de atributo): no lo consume
+                        // el storefront, solo el panel admin, así que basta con estar
+                        // autenticado; el filtro ya no exige ROLE_ADMIN global para que un
+                        // usuario que solo tenga CompanyRole (MANAGER/SELLER) pueda leerlo y
+                        // llegar al chequeo fino de @catalogAccess en cada @PreAuthorize.
+                        .requestMatchers("/api/v1/attribute-types/**").authenticated()
+                        .requestMatchers("/api/v1/attribute-values/**").authenticated()
+                        .requestMatchers("/api/v1/brands/**").authenticated()
                         .requestMatchers("/api/v1/products/**").permitAll()
                         .requestMatchers("/api/v1/product-images/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/subcategories/**").permitAll()
-                        .requestMatchers("/api/v1/subcategories/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/subcategories/**").authenticated()
+                        .requestMatchers("/api/v1/variant-attributes/**").authenticated()
                         .requestMatchers("/api/v1/variant-products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/complaints").permitAll()
                         .requestMatchers("/api/v1/complaints/**").hasRole("ADMIN")

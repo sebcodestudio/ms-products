@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class BrandController {
     private final IBrandService brandService;
 
     @PostMapping
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new brand", description = "Creates a new brand. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -111,6 +113,7 @@ public class BrandController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update brand", description = "Updates an existing brand. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -133,6 +136,7 @@ public class BrandController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete brand", description = "Soft deletes a brand. Only accessible by administrators.")
     @ApiResponses(value = {

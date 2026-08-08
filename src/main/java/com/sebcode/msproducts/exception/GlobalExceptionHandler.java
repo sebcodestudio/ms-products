@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -80,6 +81,15 @@ public class GlobalExceptionHandler {
         log.error("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
         ErrorResponse error = buildError(HttpStatus.CONFLICT, "DATA_INTEGRITY_ERROR",
                 "El recurso ya existe o tiene referencias que impiden la operacion", request);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    // 409 - Locking optimista: otro usuario modificó el registro primero
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex, WebRequest request) {
+        log.warn("Optimistic locking conflict: {}", ex.getMessage());
+        ErrorResponse error = buildError(HttpStatus.CONFLICT, "CONFLICTO_DE_EDICION",
+                "El registro fue modificado por otro usuario. Recarga los datos e intenta de nuevo.", request);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 

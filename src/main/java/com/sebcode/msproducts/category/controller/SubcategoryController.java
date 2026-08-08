@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,7 @@ public class SubcategoryController extends AuditableEntity {
     private final ISubcategoryService subcategoryService;
 
     @PostMapping
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new subcategory", description = "Creates a new subcategory. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -119,6 +121,7 @@ public class SubcategoryController extends AuditableEntity {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update subcategory", description = "Updates an existing subcategory. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -141,6 +144,7 @@ public class SubcategoryController extends AuditableEntity {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete subcategory", description = "Soft deletes a subcategory. Only accessible by administrators.")
     @ApiResponses(value = {

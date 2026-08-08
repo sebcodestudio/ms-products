@@ -16,7 +16,7 @@ import com.sebcode.msproducts.product.mapper.VariantProductMapper;
 import com.sebcode.msproducts.product.repository.VariantProductRepository;
 import com.sebcode.msproducts.product.service.IVariantProductService;
 import com.sebcode.msproducts.security.config.security.CustomUserPrincipal;
-import com.sun.jdi.request.DuplicateRequestException;
+import com.sebcode.msproducts.exception.DuplicateResourceException;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -61,7 +61,7 @@ public class VariantProductServiceImpl implements IVariantProductService {
             variantProduct.setDeleteAt(null);
             variantProductMapper.updateEntityFromDTO(variantProductRequestDTO, variantProduct);
         } else if (existing.isPresent()) {
-            throw new DuplicateRequestException(
+            throw new DuplicateResourceException(
                     "Variant product with sku '" + variantProductRequestDTO.getSku() + "' already exists");
         } else {
             variantProduct = variantProductMapper.toEntity(variantProductRequestDTO);

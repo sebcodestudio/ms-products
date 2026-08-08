@@ -42,7 +42,7 @@ public class VariantProductController {
     private final IVariantProductService variantProductService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@catalogAccess.canManageVariants(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new variant product", description = "Creates a new variant product. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -263,7 +263,7 @@ public class VariantProductController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@catalogAccess.canManageVariants(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update variant product", description = "Updates an existing variant product. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -286,7 +286,7 @@ public class VariantProductController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@catalogAccess.canManageVariants(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete variant product", description = "Soft deletes a variant product. Only accessible by administrators.")
     @ApiResponses(value = {

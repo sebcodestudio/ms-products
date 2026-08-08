@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,7 @@ public class CategoryController {
     private final ICategoryService categoryService;
 
     @PostMapping
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new category", description = "Creates a new category. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -118,6 +120,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update category", description = "Updates an existing category. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -140,6 +143,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete category", description = "Soft deletes a category. Only accessible by administrators.")
     @ApiResponses(value = {

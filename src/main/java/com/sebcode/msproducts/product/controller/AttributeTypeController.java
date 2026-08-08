@@ -22,6 +22,7 @@ import com.sebcode.msproducts.common.response.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class AttributeTypeController {
     private final IAttributeTypeService attributeTypeService;
 
     @PostMapping
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new attribute type", description = "Creates a new attribute type. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -111,6 +113,7 @@ public class AttributeTypeController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update attribute type", description = "Updates an existing attribute type. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -133,6 +136,7 @@ public class AttributeTypeController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageTaxonomy(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete attribute type", description = "Soft deletes a attribute type. Only accessible by administrators.")
     @ApiResponses(value = {

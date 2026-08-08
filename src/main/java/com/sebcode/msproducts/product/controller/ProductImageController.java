@@ -22,6 +22,7 @@ import com.sebcode.msproducts.common.response.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class ProductImageController {
     private final IProductImageService productImageService;
 
     @PostMapping
+    @PreAuthorize("@catalogAccess.canManageProducts(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new product image", description = "Creates a new product image. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -110,6 +112,7 @@ public class ProductImageController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageProducts(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update product image", description = "Updates an existing product image. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -132,6 +135,7 @@ public class ProductImageController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageProducts(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete product image", description = "Soft deletes a product image. Only accessible by administrators.")
     @ApiResponses(value = {

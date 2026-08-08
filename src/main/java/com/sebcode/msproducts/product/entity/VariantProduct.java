@@ -43,11 +43,6 @@ public class VariantProduct extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Version
-    @Column(name = "version")
-// prueba           , nullable = false)
-    private Long version; // JPA maneja automáticamente
-
     @NotBlank(message = "SKU cannot be blank")
     @Size(max = 100, message = "SKU cannot exceed 100 characters")
     @Column(length = 100, nullable = false, unique = true)

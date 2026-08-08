@@ -22,6 +22,7 @@ import com.sebcode.msproducts.common.response.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class VariantAttributeController {
     private final IVariantAttributeService variantAttributeService;
 
     @PostMapping
+    @PreAuthorize("@catalogAccess.canManageVariants(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new variant attribute", description = "Creates a new variant attribute. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -110,6 +112,7 @@ public class VariantAttributeController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageVariants(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update variant attribute", description = "Updates an existing variant attribute. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -132,6 +135,7 @@ public class VariantAttributeController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageVariants(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete variant attribute", description = "Soft deletes a variant attribute. Only accessible by administrators.")
     @ApiResponses(value = {

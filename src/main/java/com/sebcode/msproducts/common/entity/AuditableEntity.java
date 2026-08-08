@@ -21,6 +21,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public abstract class AuditableEntity {
 
+    // Locking optimista: evita que dos usuarios editando el mismo registro a la
+    // vez se pisen en silencio (gana el último PUT sin aviso). Hibernate la
+    // maneja sola: null en un registro nuevo, incrementa en cada UPDATE, y
+    // lanza ObjectOptimisticLockingFailureException si la versión en el UPDATE
+    // ya no coincide con la de la fila (alguien más la modificó primero).
+    @Version
+    @Column(nullable = false)
+    protected Long version;
+
     @NotNull(message = "State cannot be null")
     @Column(nullable = false)
     protected Boolean state;

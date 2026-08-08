@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class ProductController {
     private final IProductService productService;
 
     @PostMapping
+    @PreAuthorize("@catalogAccess.canManageProducts(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create new product", description = "Creates a new product. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -111,6 +113,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageProducts(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update product", description = "Updates an existing product. Only accessible by administrators.")
     @ApiResponses(value = {
@@ -133,6 +136,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@catalogAccess.canManageProducts(authentication)")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete product", description = "Soft deletes a product. Only accessible by administrators.")
     @ApiResponses(value = {

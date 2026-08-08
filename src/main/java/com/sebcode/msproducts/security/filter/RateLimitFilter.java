@@ -30,12 +30,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final int PUBLIC_LIMIT = 100;
     private static final Duration PUBLIC_WINDOW = Duration.ofMinutes(1);
 
+    // Limite para trafico autenticado (admin) sobre variant-products: separado del
+    // publico para que ediciones/importaciones masivas del panel admin no compitan
+    // por el mismo balde que las visitas anonimas de la tienda desde la misma IP.
+    private static final int ADMIN_WRITE_LIMIT = 300;
+    private static final Duration ADMIN_WRITE_WINDOW = Duration.ofMinutes(1);
+
     // Limite para registrar reclamos/quejas: 5 por minuto por IP (evita spam/abuso del envio de emails)
     private static final int COMPLAINTS_LIMIT = 5;
     private static final Duration COMPLAINTS_WINDOW = Duration.ofMinutes(1);
 
     private final Map<String, Bucket> loginBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> publicBuckets = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> adminWriteBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> complaintsBuckets = new ConcurrentHashMap<>();
 
     @Override
@@ -54,9 +61,15 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 return;
             }
         } else if (path.startsWith("/api/v1/variant-products")) {
-            Bucket bucket = publicBuckets.computeIfAbsent(ip, k -> buildBucket(PUBLIC_LIMIT, PUBLIC_WINDOW));
+            // Trafico con Authorization (panel admin: altas/ediciones, carga masiva) usa
+            // un balde propio y mas amplio; el resto (navegacion publica de la tienda)
+            // sigue en el balde publico de siempre.
+            boolean isAuthenticated = hasBearerToken(request);
+            Bucket bucket = isAuthenticated
+                    ? adminWriteBuckets.computeIfAbsent(ip, k -> buildBucket(ADMIN_WRITE_LIMIT, ADMIN_WRITE_WINDOW))
+                    : publicBuckets.computeIfAbsent(ip, k -> buildBucket(PUBLIC_LIMIT, PUBLIC_WINDOW));
             if (!bucket.tryConsume(1)) {
-                log.warn("Rate limit exceeded for public endpoint from IP: {}", ip);
+                log.warn("Rate limit exceeded for {} endpoint from IP: {}", isAuthenticated ? "admin" : "public", ip);
                 writeRateLimitResponse(response, "Demasiadas solicitudes. Intenta en 1 minuto.");
                 return;
             }
@@ -75,6 +88,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private Bucket buildBucket(int limit, Duration window) {
         Bandwidth bandwidth = Bandwidth.classic(limit, Refill.greedy(limit, window));
         return Bucket.builder().addLimit(bandwidth).build();
+    }
+
+    private boolean hasBearerToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        return header != null && header.regionMatches(true, 0, "Bearer ", 0, 7);
     }
 
     private String resolveClientIp(HttpServletRequest request) {
