@@ -1,4 +1,11 @@
 spring:
+  main:
+    # El free tier de Render mata el deploy si no ve el puerto abierto a tiempo
+    # (~200s de boot normal en este servicio, ya al límite antes de este cambio).
+    # Con lazy-init, Tomcat abre el puerto sin esperar a construir todos los
+    # beans (JPA, Security, repos) primero — esos se arman recién con la
+    # primera request real, no bloquean el arranque.
+    lazy-initialization: true
   jpa:
     hibernate:
       ddl-auto: none
