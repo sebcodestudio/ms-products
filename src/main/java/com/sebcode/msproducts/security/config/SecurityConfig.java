@@ -88,6 +88,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/variant-products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/complaints").permitAll()
                         .requestMatchers("/api/v1/complaints/**").hasRole("ADMIN")
+                        // Checkout de invitado (crear pedido, pagar, consultar estado): sin
+                        // login. GET /api/v1/orders/admin/search queda protegido vía
+                        // @PreAuthorize en el controller, igual que el resto del catálogo.
+                        .requestMatchers("/api/v1/orders/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/seller/**").hasRole("SELLER")
                         .anyRequest().authenticated()

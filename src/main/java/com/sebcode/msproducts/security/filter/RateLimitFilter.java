@@ -40,10 +40,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final int COMPLAINTS_LIMIT = 5;
     private static final Duration COMPLAINTS_WINDOW = Duration.ofMinutes(1);
 
+    // Limite para crear pedidos / intentar pagos: 10 por minuto por IP (evita
+    // spam de pedidos falsos o intentos repetidos de cobro con tokens invalidos)
+    private static final int ORDERS_WRITE_LIMIT = 10;
+    private static final Duration ORDERS_WRITE_WINDOW = Duration.ofMinutes(1);
+
     private final Map<String, Bucket> loginBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> publicBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> adminWriteBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> complaintsBuckets = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> ordersWriteBuckets = new ConcurrentHashMap<>();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -78,6 +84,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
             if (!bucket.tryConsume(1)) {
                 log.warn("Rate limit exceeded for complaints endpoint from IP: {}", ip);
                 writeRateLimitResponse(response, "Demasiados reclamos enviados. Intenta en 1 minuto.");
+                return;
+            }
+        } else if (path.startsWith("/api/v1/orders") && "POST".equalsIgnoreCase(request.getMethod())) {
+            Bucket bucket = ordersWriteBuckets.computeIfAbsent(ip, k -> buildBucket(ORDERS_WRITE_LIMIT, ORDERS_WRITE_WINDOW));
+            if (!bucket.tryConsume(1)) {
+                log.warn("Rate limit exceeded for orders endpoint from IP: {}", ip);
+                writeRateLimitResponse(response, "Demasiadas solicitudes de pedido. Intenta en 1 minuto.");
                 return;
             }
         }

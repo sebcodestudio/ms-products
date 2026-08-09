@@ -49,6 +49,13 @@ app:
     # Dominio público desde el que se sirven las imágenes ya subidas (distinto
     # del endpoint de la API S3). En R2 es el dominio pub-*.r2.dev del bucket.
     public-base-url: ${STORAGE_PUBLIC_BASE_URL:http://localhost:9000/${MINIO_BUCKET:product-images}}
+  payment:
+    culqi:
+      # Llave secreta, server-side, para efectivamente cobrar. La pública la
+      # usa el frontend directo (NEXT_PUBLIC_CULQI_PUBLIC_KEY), el backend no
+      # la necesita. Vacía por defecto — hay que cargar la de prueba (sandbox)
+      # de Culqi antes de poder probar un cobro real.
+      secret-key: ${CULQI_SECRET_KEY:}
 
 management:
   endpoints:
