@@ -1,5 +1,6 @@
 package com.sebcode.msproducts.order.dto.response;
 
+import com.sebcode.msproducts.order.entity.InvoiceStatus;
 import com.sebcode.msproducts.order.entity.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class OrderResponseDTO {
     private BigDecimal total;
     private String currency;
     private String paymentFailureReason;
+    private InvoiceStatus invoiceStatus;
     private List<OrderItemResponseDTO> items;
     private LocalDateTime createdAt;
 

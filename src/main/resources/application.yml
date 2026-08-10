@@ -56,6 +56,12 @@ app:
       # la necesita. Vacía por defecto — hay que cargar la de prueba (sandbox)
       # de Culqi antes de poder probar un cobro real.
       secret-key: ${CULQI_SECRET_KEY:}
+  invoicing:
+    # Sistema de facturación electrónica propio (en desarrollo, aún no en
+    # prod). Vacío por defecto: mientras no esté configurado, el envío se
+    # omite sin afectar el pago (ver ExternalElectronicInvoiceProvider).
+    api-url: ${INVOICING_API_URL:}
+    api-key: ${INVOICING_API_KEY:}
 
 management:
   endpoints:

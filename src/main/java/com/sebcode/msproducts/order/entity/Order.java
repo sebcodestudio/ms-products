@@ -66,6 +66,18 @@ public class Order extends AuditableEntity {
     @Column(name = "customer_address", nullable = false, length = 500)
     private String customerAddress;
 
+    // Requeridos por el sistema de facturación electrónica: DNI para boleta,
+    // RUC para factura.
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "customer_document_type", nullable = false, length = 10)
+    private DocumentType customerDocumentType;
+
+    @NotBlank
+    @Size(max = 20)
+    @Column(name = "customer_document_number", nullable = false, length = 20)
+    private String customerDocumentNumber;
+
     @NotNull
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
@@ -94,6 +106,18 @@ public class Order extends AuditableEntity {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    // Envío best-effort al sistema de facturación electrónica (aún en
+    // desarrollo, todavía no en prod) — nunca bloquea el pago, ver
+    // ElectronicInvoiceProvider.
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invoice_status", nullable = false, length = 20)
+    private InvoiceStatus invoiceStatus = InvoiceStatus.NOT_SENT;
+
+    // Número de boleta/factura o id devuelto por el sistema de facturación.
+    @Column(name = "invoice_reference", length = 100)
+    private String invoiceReference;
+
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
@@ -103,6 +127,7 @@ public class Order extends AuditableEntity {
         if (publicReference == null) publicReference = UUID.randomUUID();
         if (status == null) status = OrderStatus.PENDING_PAYMENT;
         if (currency == null) currency = "PEN";
+        if (invoiceStatus == null) invoiceStatus = InvoiceStatus.NOT_SENT;
         if (items == null) items = new ArrayList<>();
     }
 

@@ -1,9 +1,11 @@
 package com.sebcode.msproducts.order.dto.request;
 
+import com.sebcode.msproducts.order.entity.DocumentType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +35,14 @@ public class OrderRequestDTO {
     @NotBlank(message = "La direccion es obligatoria")
     @Size(max = 500, message = "La direccion no puede exceder 500 caracteres")
     private String customerAddress;
+
+    // Requeridos para emitir boleta (DNI) o factura (RUC) electronica.
+    @NotNull(message = "El tipo de documento (DNI o RUC) es obligatorio")
+    private DocumentType customerDocumentType;
+
+    @NotBlank(message = "El numero de documento es obligatorio")
+    @Size(max = 20, message = "El numero de documento no puede exceder 20 caracteres")
+    private String customerDocumentNumber;
 
     @NotEmpty(message = "El pedido debe tener al menos un producto")
     @Valid

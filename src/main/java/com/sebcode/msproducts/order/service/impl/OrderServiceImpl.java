@@ -6,9 +6,12 @@ import com.sebcode.msproducts.order.dto.request.OrderItemRequestDTO;
 import com.sebcode.msproducts.order.dto.request.OrderRequestDTO;
 import com.sebcode.msproducts.order.dto.request.PayOrderRequestDTO;
 import com.sebcode.msproducts.order.dto.response.OrderResponseDTO;
+import com.sebcode.msproducts.order.entity.InvoiceStatus;
 import com.sebcode.msproducts.order.entity.Order;
 import com.sebcode.msproducts.order.entity.OrderItem;
 import com.sebcode.msproducts.order.entity.OrderStatus;
+import com.sebcode.msproducts.order.invoice.ElectronicInvoiceProvider;
+import com.sebcode.msproducts.order.invoice.InvoiceResult;
 import com.sebcode.msproducts.order.mapper.OrderMapper;
 import com.sebcode.msproducts.order.payment.ChargeResult;
 import com.sebcode.msproducts.order.payment.PaymentProvider;
@@ -42,6 +45,7 @@ public class OrderServiceImpl implements IOrderService {
     private final VariantProductRepository variantProductRepository;
     private final OrderMapper orderMapper;
     private final PaymentProvider paymentProvider;
+    private final ElectronicInvoiceProvider invoiceProvider;
 
     @Override
     @Transactional
@@ -89,6 +93,8 @@ public class OrderServiceImpl implements IOrderService {
                 .customerPhone(requestDTO.getCustomerPhone())
                 .customerEmail(requestDTO.getCustomerEmail())
                 .customerAddress(requestDTO.getCustomerAddress())
+                .customerDocumentType(requestDTO.getCustomerDocumentType())
+                .customerDocumentNumber(requestDTO.getCustomerDocumentNumber())
                 .subtotal(total)
                 .total(total)
                 .currency("PEN")
@@ -127,6 +133,7 @@ public class OrderServiceImpl implements IOrderService {
             order.setPaymentReference(result.paymentReference());
             order.setPaidAt(LocalDateTime.now());
             applyStockForPaidOrder(order);
+            emitInvoiceBestEffort(order);
         } else {
             order.setStatus(OrderStatus.PAYMENT_FAILED);
             order.setPaymentFailureReason(result.failureReason());
@@ -135,6 +142,30 @@ public class OrderServiceImpl implements IOrderService {
         Order saved = orderRepository.save(order);
         log.info("Pago de pedido {} -> {}", saved.getPublicReference(), saved.getStatus());
         return orderMapper.toResponseDTO(saved);
+    }
+
+    /**
+     * El pago ya se confirmó — esto nunca debe hacer fallar payOrder. Si el
+     * sistema de facturación no está configurado o falla, el pedido queda
+     * igual PAID; invoiceStatus registra qué pasó para poder reintentar o
+     * facturar manualmente después.
+     */
+    private void emitInvoiceBestEffort(Order order) {
+        try {
+            InvoiceResult result = invoiceProvider.emitInvoice(order);
+            if (result.success()) {
+                order.setInvoiceStatus(InvoiceStatus.SENT);
+                order.setInvoiceReference(result.invoiceReference());
+            } else if (!result.skipped()) {
+                order.setInvoiceStatus(InvoiceStatus.FAILED);
+                log.error("No se pudo emitir boleta/factura del pedido {}: {}",
+                        order.getPublicReference(), result.failureReason());
+            }
+            // skipped (no configurado) deja invoiceStatus en NOT_SENT tal cual.
+        } catch (Exception e) {
+            order.setInvoiceStatus(InvoiceStatus.FAILED);
+            log.error("Error inesperado emitiendo boleta/factura del pedido {}", order.getPublicReference(), e);
+        }
     }
 
     /**
