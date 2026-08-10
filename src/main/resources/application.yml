@@ -50,6 +50,10 @@ app:
     # del endpoint de la API S3). En R2 es el dominio pub-*.r2.dev del bucket.
     public-base-url: ${STORAGE_PUBLIC_BASE_URL:http://localhost:9000/${MINIO_BUCKET:product-images}}
   payment:
+    # culqi (default) = cobro real vía Culqi. mock = simula el cobro sin
+    # llamar a ninguna pasarela (ver MockPaymentProvider) — útil para probar
+    # el flujo end-to-end antes de tener llaves de prueba de Culqi.
+    provider: ${PAYMENT_PROVIDER:culqi}
     culqi:
       # Llave secreta, server-side, para efectivamente cobrar. La pública la
       # usa el frontend directo (NEXT_PUBLIC_CULQI_PUBLIC_KEY), el backend no
@@ -57,11 +61,27 @@ app:
       # de Culqi antes de poder probar un cobro real.
       secret-key: ${CULQI_SECRET_KEY:}
   invoicing:
-    # Sistema de facturación electrónica propio (en desarrollo, aún no en
-    # prod). Vacío por defecto: mientras no esté configurado, el envío se
-    # omite sin afectar el pago (ver ExternalElectronicInvoiceProvider).
+    # external (default) = llama a la API real del sistema de facturación.
+    # mock = simula la emisión de boleta/factura sin llamar a nada (ver
+    # MockElectronicInvoiceProvider) — útil para probar el flujo antes de
+    # tener el contrato real de esa API.
+    mode: ${INVOICING_MODE:external}
+    # Sistema de facturación electrónica propio ("facturacion-app", Quarkus,
+    # aún no en prod). Vacío por defecto: mientras no esté configurado, el
+    # envío se omite sin afectar el pago (ver ExternalElectronicInvoiceProvider).
+    # api-url es la base (sin /api/comprobantes/...), ej. http://localhost:8081.
     api-url: ${INVOICING_API_URL:}
     api-key: ${INVOICING_API_KEY:}
+    serie-boleta: ${SERIE_BOLETA:B001}
+    serie-factura: ${SERIE_FACTURA:F001}
+    emisor:
+      # Datos fijos de la empresa que emite el comprobante — van en cada
+      # boleta/factura, no dependen del pedido.
+      ruc: ${EMISOR_RUC:}
+      razon-social: ${EMISOR_RAZON_SOCIAL:}
+      nombre-comercial: ${EMISOR_NOMBRE_COMERCIAL:}
+      ubigeo: ${EMISOR_UBIGEO:}
+      direccion: ${EMISOR_DIRECCION:}
 
 management:
   endpoints:

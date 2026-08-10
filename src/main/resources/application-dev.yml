@@ -53,3 +53,14 @@ spring:
     level:
       org.flywaydb: DEBUG
       org.springframework.boot.autoconfigure.flyway: DEBUG
+
+app:
+  payment:
+    # En local, simulado por defecto — no hace falta llave de Culqi para
+    # probar el flujo. Forzar PAYMENT_PROVIDER=culqi para probar contra el
+    # sandbox real una vez que haya llaves.
+    provider: ${PAYMENT_PROVIDER:mock}
+  invoicing:
+    # Igual: simulado por defecto en local, hasta tener el contrato real de
+    # la API de facturación.
+    mode: ${INVOICING_MODE:mock}

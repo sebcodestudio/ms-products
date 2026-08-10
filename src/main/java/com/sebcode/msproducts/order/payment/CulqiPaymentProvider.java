@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sebcode.msproducts.order.entity.PaymentProviderType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -16,9 +17,15 @@ import java.util.Map;
  * Cobra usando la API de cargos de Culqi (https://api.culqi.com/v2/charges).
  * El "token" ya viene generado del lado del cliente por Culqi Checkout — acá
  * solo se usa para efectivamente cobrar, con la llave secreta.
+ * <p>
+ * Activo salvo que app.payment.provider=mock (ver MockPaymentProvider) — en
+ * local (application-dev.yml) el mock es el default, así que esta clase
+ * queda inactiva ahí hasta que se cargue una llave de prueba real y se
+ * fuerce PAYMENT_PROVIDER=culqi.
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(prefix = "app.payment", name = "provider", havingValue = "culqi", matchIfMissing = true)
 public class CulqiPaymentProvider implements PaymentProvider {
 
     private static final String CHARGES_URL = "https://api.culqi.com/v2/charges";

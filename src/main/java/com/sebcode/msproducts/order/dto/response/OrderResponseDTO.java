@@ -25,6 +25,7 @@ public class OrderResponseDTO {
     private String currency;
     private String paymentFailureReason;
     private InvoiceStatus invoiceStatus;
+    private String invoiceReference;
     private List<OrderItemResponseDTO> items;
     private LocalDateTime createdAt;
 
