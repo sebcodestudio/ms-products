@@ -71,6 +71,7 @@ app:
     # envío se omite sin afectar el pago (ver ExternalElectronicInvoiceProvider).
     # api-url es la base (sin /api/comprobantes/...), ej. http://localhost:8081.
     api-url: ${INVOICING_API_URL:}
+    # Se manda como header X-API-Key (no Bearer) — así lo expone facturacion-app.
     api-key: ${INVOICING_API_KEY:}
     serie-boleta: ${SERIE_BOLETA:B001}
     serie-factura: ${SERIE_FACTURA:F001}

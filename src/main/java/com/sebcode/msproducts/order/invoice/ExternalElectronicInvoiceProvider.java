@@ -29,6 +29,8 @@ import java.util.Map;
  * Activo salvo que app.invoicing.mode=mock (ver MockElectronicInvoiceProvider)
  * — en local (application-dev.yml) el mock es el default hasta que
  * INVOICING_API_URL/INVOICING_API_KEY/datos del emisor estén configurados.
+ * <p>
+ * Auth: header X-API-Key (no Bearer) — así lo expone facturacion-app.
  */
 @Slf4j
 @Component
@@ -71,7 +73,7 @@ public class ExternalElectronicInvoiceProvider implements ElectronicInvoiceProvi
 
         RestClient.Builder builder = RestClient.builder();
         if (StringUtils.hasText(apiKey)) {
-            builder.defaultHeader("Authorization", "Bearer " + apiKey);
+            builder.defaultHeader("X-API-Key", apiKey);
         }
         this.restClient = builder.build();
     }
@@ -136,8 +138,9 @@ public class ExternalElectronicInvoiceProvider implements ElectronicInvoiceProvi
         );
 
         Map<String, Object> receptor = Map.of(
-                // Catálogo 06 SUNAT (tipo de documento de identidad): 1=DNI, 6=RUC.
-                "tipoDocumento", isFactura ? "6" : "1",
+                // facturacion-app espera el literal "DNI"/"RUC", no el código
+                // numérico del catálogo 06 SUNAT — coincide con DocumentType.name().
+                "tipoDocumento", order.getCustomerDocumentType().name(),
                 "numeroDocumento", order.getCustomerDocumentNumber(),
                 "razonSocialONombres", order.getCustomerName(),
                 "direccion", order.getCustomerAddress()
