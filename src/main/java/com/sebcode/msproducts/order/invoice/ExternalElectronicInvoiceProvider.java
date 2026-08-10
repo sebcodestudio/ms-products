@@ -143,7 +143,8 @@ public class ExternalElectronicInvoiceProvider implements ElectronicInvoiceProvi
                 "tipoDocumento", order.getCustomerDocumentType().name(),
                 "numeroDocumento", order.getCustomerDocumentNumber(),
                 "razonSocialONombres", order.getCustomerName(),
-                "direccion", order.getCustomerAddress()
+                "direccion", order.getCustomerAddress(),
+                "email", order.getCustomerEmail()
         );
 
         Map<String, Object> body = new HashMap<>();

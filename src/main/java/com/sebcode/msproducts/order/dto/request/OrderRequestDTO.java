@@ -28,6 +28,7 @@ public class OrderRequestDTO {
     @Size(max = 30, message = "El telefono no puede exceder 30 caracteres")
     private String customerPhone;
 
+    @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email no es valido")
     @Size(max = 150, message = "El email no puede exceder 150 caracteres")
     private String customerEmail;
